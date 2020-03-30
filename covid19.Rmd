@@ -14,44 +14,48 @@ There has been a lot of emphasis about "flattening the curve" in the media and i
 
 
 # Worldwide cases
+Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
 
-I am using the [nCov2019 R package](http://www.github.com/GuangchuangYu/nCov2019) to extract information about country-specific number of cases.
+
+```{r}
+#these libraries need to be loaded
+library(utils)
+library(httr)
+
+#download the dataset from the ECDC website to a local temporary file
+GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext = ".csv")))
+
+#read the Dataset sheet into “R”. The dataset will be called "data".
+data <- read.csv(tf)
+data$dateRep <- as.Date(data$dateRep, format="%d/%m/%Y")
+
+## cumulative number of cases by country
+library(dplyr)
+df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(countriesAndTerritories) %>% mutate(cumsum = cumsum(cases))
+
+```
+
 
 ## Number of confirmed cases vs. time, plot for the top 20 countries based on number of confirmed cases
 
 ```{r, warning=FALSE}
-# this package provides the data 
-# remotes::install_github("GuangchuangYu/nCov2019")
-require(nCov2019)
-require(dplyr)
-
-x <- get_nCov2019()
-y <- load_nCov2019()
-
-y
-
-#library(DataExplorer)
-#plot_str(x)
-
+library(dplyr)
 #obtain top 20 country
-d <- y['global'] #extract global data
-#l1 <- which(d$country != 'China')
-#d <- d[l1,] #exclude China
-n <- d %>% filter(time == time(y)) %>%
- top_n(20, cum_confirm) %>%
- arrange(desc(cum_confirm))
-
+top20 <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=20, wt=cumsum) %>%
+ arrange(desc(cumsum))
 
 #plot top 20
 
 require(ggplot2)
 require(ggrepel)
 
-ggplot(filter(d, country %in% n$country, d$time > "2020-01-01"),
- aes(time, cum_confirm, color=country)) +
+
+ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), #df$dateRep > "2020-01-01"),
+ aes(dateRep, cumsum, color=countriesAndTerritories)) +
  geom_line() +
- geom_text_repel(aes(label=country),
- function(d) d[d$time == time(y),]) +
+ geom_text_repel(aes(label=countriesAndTerritories),
+ function(d) d[d$time == format(Sys.time(),"%Y-%m-%d"),]) +
  theme_minimal(base_size=14) +
  theme(legend.position = "none") +
   ylab("Cumulative confirmed number of cases") +
@@ -66,18 +70,16 @@ ggplot(filter(d, country %in% n$country, d$time > "2020-01-01"),
 ## Number of confirmed cases, table
 
 ```{r}
-d <- y['global'] #extract global data
-my.agg <- aggregate(cum_confirm~time+country, data=d, sum)
-latest.df <- my.agg[my.agg$time == max(my.agg$time),]
-oo <- order(latest.df$cum_confirm, decreasing=TRUE)
-# format(Sys.time(),"%Y-%m-%d")
+for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ arrange(desc(cumsum))
 ```
-There were `r sum(latest.df$cum_confirm)` confirmed cases as this document was generated. This is based on the data obtained above which is only updated once a day.
 
+There were `r sum(for.kable$cumsum)` confirmed cases as this document was generated. This is based on the data obtained above which is only updated once a day.
 
 ```{r, results="asis"}
 library(knitr)
-kable(cbind(rank=1:length(oo),latest.df[oo,]), row.names = FALSE)
+vars <- c("countriesAndTerritories", "cumsum")
+kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
 ```
 # Country-specific analyses
 
@@ -86,39 +88,37 @@ Now let's look at a few countries in more details, to see whether their number o
 
 ```{r, fig.asp=5}
 
-d <- y['global'] #extract global data
 countries <- c("Japan","China","United States","Canada","Spain","Italy","France","Germany","Czechia","Norway","Australia","Argentina","Morocco","South Korea","Iran","Switzerland","Russia","Denmark","Singapore","Israel","United Kingdom")
 
-this.data <- d[which(d$country %in% countries & d$cum_confirm>100),]
+this.data <- df[which(df$countriesAndTerritories %in% countries & df$cumsum>100),]
 
 # lm(log(cum_confirm)~time*country, data=this.data)
 
 
 ggplot(this.data,
- aes(time, cum_confirm)) +
+ aes(dateRep, cumsum)) +
  geom_line() + 
 #  stat_smooth(method = 'nls', formula = y ~ a*exp(b *x), aes(colour = 'Exponential'), se = FALSE, start = list(a=10,b=1)) +
-  facet_wrap(~country, ncol=2, scales="free_y")
+  facet_wrap(~countriesAndTerritories, ncol=2, scales="free_y")
 
 ```
 
 An alternative is to present the number of cumulative cases starting on the date when 100 or more cases were recorded in each country. 
 
 ```{r}
-d <- y['global'] #extract global data
-first.day.100 <- aggregate(time~country, data=d[which(d$cum_confirm>=100),],min)
-d2 <- merge(d, first.day.100, by="country")
-d2$days.since.100 <- d2$time.x - d2$time.y
+first.day.100 <- aggregate(dateRep~countriesAndTerritories, data=df[which(df$cumsum>=100),],min)
+d2 <- merge(df, first.day.100, by="countriesAndTerritories")
+d2$days.since.100 <- d2$dateRep.x - d2$dateRep.y
 
-n <- d2 %>% filter(time.x == time(y)) %>%
- top_n(20, cum_confirm) %>%
- arrange(desc(cum_confirm))
+n <- d2 %>% filter(dateRep.x == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(20, cumsum) %>%
+ arrange(desc(cumsum))
 
 
 #plot top 20
 
-ggplot(filter(d2, country %in% n$country, as.numeric(d2$days.since.100)>0),
- aes(as.numeric(days.since.100), cum_confirm, color=country)) +
+ggplot(filter(d2, countriesAndTerritories %in% n$countriesAndTerritories, as.numeric(d2$days.since.100)>0),
+ aes(as.numeric(days.since.100), cumsum, color=countriesAndTerritories)) +
  geom_line() +
  theme_minimal(base_size=14) +
  theme(legend.position = "none") +
@@ -134,28 +134,26 @@ ggplot(filter(d2, country %in% n$country, as.numeric(d2$days.since.100)>0),
 Italy has been in the news a lot because of the scale of the outbreak in that country. See how the situation is evolving in recent days.
 
 ```{r}
-d <- y['global'] #extract global data
-italydata <- d %>%
-filter(d$country == "Italy" & d$cum_confirm>100) %>%
-select(time,cum_confirm)
+italydata <- df %>%
+filter(countriesAndTerritories == "Italy" & cumsum>100) %>%
+select(dateRep,cumsum,cases)
 
 
+italydata$R <- italydata$cases / lag(italydata$cases)
 
-italydata$new_cases <- italydata$cum_confirm - lag(italydata$cum_confirm)
-italydata$R <- italydata$new_cases / lag(italydata$new_cases)
-
-plot(R~time, data=italydata, type='l')
+plot(R~dateRep, data=italydata, type='l')
 abline(a=1,b=0, lty=2)
 
 mean(italydata$R, na.rm = TRUE)
 
-my.lm <- lm(log(cum_confirm)~time, data=italydata)
-lm.pred <- data.frame(time=italydata$time, cum_confirm=exp(fitted(my.lm)))
+my.lm <- lm(log(cumsum)~dateRep, data=italydata)
+lm.pred <- data.frame(dateRep=italydata$dateRep, cumsum=exp(fitted(my.lm)))
 
+my.logistic <- SSA
 
-ggplot(italydata, aes(time, cum_confirm)) +
+ggplot(italydata, aes(dateRep, cumsum)) +
   geom_line() +
-  geom_line(data=lm.pred, aes(time, cum_confirm, color="exponential model"), linetype=2) +
+  geom_line(data=lm.pred, aes(dateRep, cumsum, color="exponential model"), linetype=2) +
   guides(color=guide_legend("Model type")) +
   ggtitle("Italy")
   

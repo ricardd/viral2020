@@ -8,8 +8,6 @@ output: html_notebook
 # Context
 Notes about analyses of COVID-19 data. 
 
-There has been a lot of emphasis about "flattening the curve" in the media and in motivating public health measures. However, the most common type of plot presented shows the cumulative number of cases over time, whereas the "bell curve" that needs to be flattened is when looking at the number of NEW cases over time. So I will be generating both plots below.
-
 # Worldwide cases
 Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
 
@@ -38,7 +36,7 @@ df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(coun
 
 ## Number of confirmed cases vs. time, plot for the top 20 countries based on number of confirmed cases
 
-```{r, fig.height=9, fig.width=6}
+```{r, fig.height=6, fig.width=8}
 library(dplyr)
 #obtain top 20 country
 top20 <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
@@ -71,7 +69,7 @@ for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>
  arrange(desc(cumsum))
 ```
 
-There were `r sum(for.kable$cumsum)` confirmed cases as this document was generated (`r paste0("Last modified timestap: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum>100,])` countries had more than 100 reported cases.
+There were `r sum(for.kable$cumsum)` confirmed cases as this document was generated (`r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum>100,])` countries had more than 100 reported cases.
 
 ```{r, results="asis"}
 library(knitr)
@@ -82,7 +80,7 @@ kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
 
 An alternative is to present the number of cumulative cases starting on the date when 100 or more cases were recorded in each country, and also to use a logarithmic scale for the y axis. 
 
-```{r, fig.height=7, fig.width=10}
+```{r, fig.height=6, fig.width=8}
 first.day.100 <- aggregate(dateRep~countriesAndTerritories, data=df[which(df$cumsum>=100),],min)
 d2 <- merge(df, first.day.100, by="countriesAndTerritories")
 d2$days.since.100 <- d2$dateRep.x - d2$dateRep.y

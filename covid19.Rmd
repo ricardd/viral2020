@@ -26,8 +26,8 @@ GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate
 data <- read.csv(tf)
 
 ## DR
-data$dateRep <- as.Date(data$dateRep, format="%d/%m/%Y") ## DR, incoming data is formatted day/month/year and was not recognised corretly as a date
-## cumulative number of cases by country
+data$dateRep <- as.Date(data$dateRep, format="%d/%m/%Y") ## DR, incoming data is formatted day/month/year and was not recognised correctly as a date
+## compute the cumulative number of cases by country
 library(dplyr)
 df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(countriesAndTerritories) %>% mutate(cumsum = cumsum(cases))
 
@@ -49,7 +49,7 @@ require(ggplot2)
 require(ggrepel)
 
 
-ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), #df$dateRep > "2020-01-01"),
+g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), #df$dateRep > "2020-01-01"),
  aes(dateRep, cumsum, color=countriesAndTerritories)) +
  geom_line() +
  geom_text_repel(aes(label=countriesAndTerritories),
@@ -58,6 +58,9 @@ ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), #
  theme(legend.position = "none") +
   ylab("Cumulative confirmed number of cases") +
   ggtitle("Top 20 countries - cumulative")
+g
+## and in log space
+g + scale_y_log10()
 
 ```
 
@@ -71,7 +74,7 @@ for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>
 
 There were `r sum(for.kable$cumsum)` confirmed cases as this document was generated (`r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum>100,])` countries had more than 100 reported cases.
 
-```{r, results="asis"}
+```{r, results="asis", fig.cap="Cumulative number of confirmed COVID-19 cases by country."}
 library(knitr)
 vars <- c("countriesAndTerritories", "cumsum")
 kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
@@ -101,7 +104,7 @@ d2 %>%
   ylab("Cumulative confirmed number of cases") +
   ggtitle("Top 20 countries - cumulative")
 
-g
+#g
 # and in log space
 g + scale_y_log10()
 

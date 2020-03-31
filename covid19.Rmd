@@ -1,15 +1,15 @@
 ---
 title: "Notebook of COVID-19 analyses"
 author: "Daniel Ricard (daniel.ricard@gmail.com)"
-date: '`r paste0("Last modified timestap: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"))`'
+date: '`r paste0("Last modified timestap: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"))`'
 output: html_notebook
 ---
 
 # Context
-Notes about analyses of COVID-19 data. 
+Notes about analyses of COVID-19 data. Inspired by [an article on Towards Data Science](https://towardsdatascience.com/visualize-the-pandemic-with-r-covid-19-c3443de3b4e4)
 
 # Worldwide cases
-Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
+Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and updated on a daily basis. There are likely other sources that are updated more regularly (e.g. the many sources used by [worldometers] (https://www.worldometers.info/coronavirus/) uses), but this is a decent starting point.
 
 
 ```{r}
@@ -31,9 +31,9 @@ data$dateRep <- as.Date(data$dateRep, format="%d/%m/%Y") ## DR, incoming data is
 ## compute the cumulative number of fatalities by country
 library(dplyr)
 df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(countriesAndTerritories) %>% mutate(cumsum.cases = cumsum(cases)) %>% mutate(cumsum.deaths = cumsum(deaths))
-
-
-
+df$death.rate.percent <- 100*(df$cumsum.deaths / df$cumsum.cases)
+df$cases.per.e06 <- (df$cumsum.cases / df$popData2018)*1E06
+df$deaths.per.e06 <- (df$cumsum.deaths / df$popData2018)*1E06
 ```
 
 ## Number of fatalities vs. time, plot for the top 20 countries based on number of fatalities
@@ -121,11 +121,12 @@ for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>
  arrange(desc(cumsum.cases))
 ```
 
-There were `r sum(for.kable$cumsum.cases)` confirmed cases as this document was generated (`r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
+There were `r format(sum(for.kable$cumsum.cases),big.mark=",")` confirmed cases and `r format(sum(for.kable$cumsum.deaths),big.mark=",")` deaths as this document was generated using the data obtained from the ECDC (HTML generated `r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
 
-```{r, results="asis", fig.cap="Cumulative number of confirmed COVID-19 cases by country."}
+```{r, results="asis"}
 library(knitr)
-vars <- c("countriesAndTerritories", "cumsum.cases","cumsum.deaths")
+vars <- c("countriesAndTerritories", "cumsum.cases","cumsum.deaths", "cases.per.e06", "deaths.per.e06", "death.rate.percent"
+)
 kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
 ```
 
@@ -168,7 +169,7 @@ Show the number of cumulative confirmed cases for a number of countries, sharing
 
 ```{r, fig.asp=5}
 
-countries <- c("Japan","China","United States","Canada","Spain","Italy","France","Germany","Czechia","Norway","Australia","Argentina","Morocco","South Korea","Iran","Switzerland","Russia","Denmark","Singapore","Israel","United Kingdom")
+countries <- c("Japan","China","United States","Canada","Spain","Italy","France","Germany","Czechia","Norway","Australia","Argentina","Morocco","South Korea","Iran","Switzerland","Russia","Denmark","Singapore","Israel","United Kingdom","Chile")
 
 this.data <- df[which(df$countriesAndTerritories %in% countries & df$cumsum.cases>100),]
 
@@ -181,7 +182,7 @@ ggplot(this.data,
 ```
 
 ## Fitting models
-Fit exponential and logistic models to the data to see whether some countries are seeing a decrease in the number of cases. Let's take South Korea and the United States as examples to start.
+Fit exponential and logistic models to the data to see whether some countries are seeing a decrease in the number of cases. Let's take South Korea, the United States and Canada as examples to start.
 
 ```{r}
 my.logistic <- function(a=90, b=0.1, c=1E03, ti){
@@ -210,6 +211,25 @@ g <- ggplot(southkoreadata, aes(dateRep.x, cumsum.cases)) +
   ggtitle("South Korea")
 g
 
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+southkoreadata$cases.3day.avg <- NA
+oo <- order(southkoreadata$dateRep.x)
+southkoreadata <- southkoreadata[oo,] # order by date
+
+days <- seq(from=range(southkoreadata$dateRep.x)[1]+2,to=range(southkoreadata$dateRep.x)[2],1)
+for(d in days){
+  l1 <- which(southkoreadata$dateRep.x==d)
+  southkoreadata[l1,"cases.3day.avg"] <- mean(southkoreadata[l1:(l1-2),"cases"])
+}
+
+southkoreadata$R.3day.avg <- southkoreadata$cases.3day.avg / lag(southkoreadata$cases.3day.avg)
+
+ggplot(southkoreadata, aes(dateRep.x, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("South Korea - R values by day, using a 3 day moving average")
+
 ## US
 usdata <- d2 %>%
   filter(countriesAndTerritories == "United_States_of_America" & cumsum.cases>100) %>%
@@ -234,26 +254,80 @@ ggplot(usdata, aes(dateRep.x, cumsum.cases)) +
   geom_line(data=us.lm.pred, aes(dateRep.x, cumsum.cases, color="exponential model"), linetype=2) +
  # geom_line(data=sk.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
   guides(color=guide_legend("Model type")) +
-  ggtitle("United States")
+  ggtitle("United States") 
 
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+usdata$cases.3day.avg <- NA
+oo <- order(usdata$dateRep.x)
+usdata <- usdata[oo,] # order by date
+
+days <- seq(from=range(usdata$dateRep.x)[1]+2,to=range(usdata$dateRep.x)[2],1)
+for(d in days){
+  l1 <- which(usdata$dateRep.x==d)
+  usdata[l1,"cases.3day.avg"] <- mean(usdata[l1:(l1-2),"cases"])
+}
+
+usdata$R.3day.avg <- usdata$cases.3day.avg / lag(usdata$cases.3day.avg)
+
+ggplot(usdata, aes(dateRep.x, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("United States - R values by day, using a 3 day moving average")
+
+
+## Canada
+canadadata <- d2 %>%
+  filter(countriesAndTerritories == "Canada" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep.x,cumsum.cases,cases,days.since.100)
+canada.lm <- lm(log(cumsum.cases)~dateRep.x, data=canadadata)
+canada.lm.pred <- data.frame(dateRep.x=canadadata$dateRep, cumsum.cases=exp(fitted(canada.lm)))
+
+
+ggplot(canadadata, aes(dateRep.x, cumsum.cases)) +
+  geom_line() +
+  geom_line(data=canada.lm.pred, aes(dateRep.x, cumsum.cases, color="exponential model"), linetype=2) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("Canada") 
+
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+canadadata$cases.3day.avg <- NA
+oo <- order(canadadata$dateRep.x)
+canadadata <- canadadata[oo,] # order by date
+
+days <- seq(from=range(canadadata$dateRep.x)[1]+2,to=range(canadadata$dateRep.x)[2],1)
+for(d in days){
+  l1 <- which(canadadata$dateRep.x==d)
+  canadadata[l1,"cases.3day.avg"] <- mean(canadadata[l1:(l1-2),"cases"])
+}
+
+canadadata$R.3day.avg <- canadadata$cases.3day.avg / lag(canadadata$cases.3day.avg)
+
+ggplot(canadadata, aes(dateRep.x, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("Canada - R values by day, using a 3 day moving average")
 
 ```
 
 
 
 ## Number of cases per million people
-Number of cases per one million people. The top of this list is composed of places with small populations.
+Order by decreasing number of cases per one million people. The top of this list is composed of places with small populations.
 
 
 ```{r}
-df$cumsum.cases.per.e06 <- (df$cumsum.cases / df$popData2018) * 1E06
+#df$cumsum.cases.per.e06 <- (df$cumsum.cases / df$popData2018) * 1E06
 per.capita <- df %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) 
 
-ggplot(per.capita, aes(cumsum.cases.per.e06)) +
+ggplot(per.capita, aes(cases.per.e06)) +
   geom_histogram()
 
-vars<-c("dateRep","countriesAndTerritories","cumsum.cases","popData2018","cumsum.cases.per.e06")
-kable(per.capita[order(per.capita$cumsum.cases.per.e06,decreasing=TRUE),vars])
+vars<-c("dateRep","countriesAndTerritories","cumsum.cases","popData2018","cases.per.e06")
+kable(per.capita[order(per.capita$cases.per.e06,decreasing=TRUE),vars])
 
 ```
 

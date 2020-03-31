@@ -49,7 +49,7 @@ require(ggplot2)
 require(ggrepel)
 
 
-g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), #df$dateRep > "2020-01-01"),
+g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), 
  aes(dateRep, cumsum, color=countriesAndTerritories)) +
  geom_line() +
  geom_text_repel(aes(label=countriesAndTerritories),
@@ -62,6 +62,21 @@ g
 ## and in log space
 g + scale_y_log10()
 
+```
+
+## Number of active cases vs. cumulative
+
+This [YouTube video](https://www.youtube.com/watch?v=54XLXg4fYsc&feature=youtu.be&fbclid=IwAR2SRKtyPt9AuW-JPh4jn1E4Fk4s2rRRqPCvM_X6t62Bxgg9ulDV-HJrbfg) makes a number of great suggestions to look at the COVID-19 information on confirmed cases. One suggestion is to plot the number of new cases as a function of the cumulative number of cases and to use a log scale on both axes.
+
+```{r, fig.height=6, fig.width=8}
+
+
+g <- 
+  ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories, cases>0), aes(cumsum, cases)) +
+  geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
+  scale_x_log10() +
+  scale_y_log10()
+g
 ```
 
 
@@ -146,3 +161,4 @@ vars<-c("dateRep","countriesAndTerritories","cumsum","popData2018","cumsum.per.e
 kable(per.capita[order(per.capita$cumsum.per.e06,decreasing=TRUE),vars])
 
 ```
+

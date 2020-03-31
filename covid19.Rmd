@@ -146,7 +146,68 @@ ggplot(this.data,
 
 ```
 
+## Fitting models
+Fit exponential and logistic models to the data to see whether some countries are seeing a decrease in the number of cases. Let's take South Korea and the United States as examples to start.
 
+```{r}
+my.logistic <- function(a=90, b=0.1, c=1E03, ti){
+  out <- c / (1 + (a*exp(-b*ti)))
+  return(out)
+}
+#time <- 0:100
+#plot(x=time,y=my.logistic(ti=time))
+
+
+southkoreadata <- d2 %>%
+  filter(countriesAndTerritories == "South_Korea" & cumsum>100) %>%
+  select(countriesAndTerritories,dateRep.x,cumsum,cases,days.since.100)
+
+sk.lm <- lm(log(cumsum)~dateRep.x, data=southkoreadata)
+sk.lm.pred <- data.frame(dateRep.x=southkoreadata$dateRep, cumsum=exp(fitted(sk.lm)))
+
+sk.logistic <- nls(cumsum ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=southkoreadata, start=list(a=5E03,b=1.2,c=1E04))
+sk.logistic.pred <- data.frame(dateRep=southkoreadata$dateRep.x, days.since.100=as.numeric(southkoreadata$days.since.100), cumsum=fitted(sk.logistic))
+
+g <- ggplot(southkoreadata, aes(dateRep.x, cumsum)) +
+  geom_line() +
+  geom_line(data=sk.lm.pred, aes(dateRep.x, cumsum, color="exponential model"), linetype=2) +
+  geom_line(data=sk.logistic.pred, aes(dateRep, cumsum, color="logistic model"), linetype=1) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("South Korea")
+g
+
+## US
+usdata <- d2 %>%
+  filter(countriesAndTerritories == "United_States_of_America" & cumsum>100) %>%
+  select(countriesAndTerritories,dateRep.x,cumsum,cases,days.since.100)
+us.lm <- lm(log(cumsum)~dateRep.x, data=usdata)
+us.lm.pred <- data.frame(dateRep.x=usdata$dateRep, cumsum=exp(fitted(us.lm)))
+#us.logistic 
+
+us.logistic <- nls(cumsum ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=usdata, start=list(a=1E03,b=0.28,c=2E05))
+
+a=1E03
+b=0.28
+c=2E05
+#plot(usdata$days.since.100, usdata$cumsum)
+#points(usdata$days.since.100, my.logistic(a,b,c,as.numeric(usdata$days.since.100)), pch=19, col="red")
+
+
+us.logistic.pred <- data.frame(dateRep=usdata$dateRep.x, days.since.100=as.numeric(usdata$days.since.100), cumsum=fitted(us.logistic))
+
+ggplot(usdata, aes(dateRep.x, cumsum)) +
+  geom_line() +
+  geom_line(data=us.lm.pred, aes(dateRep.x, cumsum, color="exponential model"), linetype=2) +
+ # geom_line(data=sk.logistic.pred, aes(dateRep, cumsum, color="logistic model"), linetype=1) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("United States")
+
+
+```
+
+
+
+## Number of cases per million people
 Number of cases per one million people. The top of this list is composed of places with small populations.
 
 

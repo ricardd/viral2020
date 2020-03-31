@@ -121,7 +121,7 @@ for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>
  arrange(desc(cumsum.cases))
 ```
 
-There were `r sum(for.kable$cumsum.cases)` confirmed cases as this document was generated (`r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum>100,])` countries had more than 100 reported cases.
+There were `r sum(for.kable$cumsum.cases)` confirmed cases as this document was generated (`r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
 
 ```{r, results="asis", fig.cap="Cumulative number of confirmed COVID-19 cases by country."}
 library(knitr)

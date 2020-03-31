@@ -223,7 +223,7 @@ summary {
 
 <h1 class="title toc-ignore">Notebook of COVID-19 analyses</h1>
 <h4 class="author">Daniel Ricard (<a href="mailto:daniel.ricard@gmail.com">daniel.ricard@gmail.com</a>)</h4>
-<h4 class="date">Last modified timestap: 2020-03-30 21:30:21</h4>
+<h4 class="date">Last modified timestap: 2020-03-30 21:47:15</h4>
 
 </div>
 
@@ -312,7 +312,7 @@ g + scale_y_log10()</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>There were 714964 confirmed cases as this document was generated (2020-03-30 21:30:21). A total of 195 countries had COVID-19 reported cases, and 103 countries had more than 100 reported cases.</p>
+<p>There were 714964 confirmed cases as this document was generated (2020-03-30 21:47:15). A total of 195 countries had COVID-19 reported cases, and 103 countries had more than 100 reported cases.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShrbml0cilcbnZhcnMgPC0gYyhcImNvdW50cmllc0FuZFRlcnJpdG9yaWVzXCIsIFwiY3Vtc3VtXCIpXG5rYWJsZShjYmluZChyYW5rPTE6bnJvdyhmb3Iua2FibGUpLGZvci5rYWJsZVssdmFyc10pLCByb3cubmFtZXMgPSBGQUxTRSlcbmBgYCJ9 -->
@@ -1347,7 +1347,7 @@ g + scale_y_log10()</code></pre>
 <div id="a-few-countries-in-more-details" class="section level2">
 <h2>A few countries in more details</h2>
 <p>Before fitting exponential and logistic growth models to the available data, let’s look at a few countries separately.</p>
-<p>Show the number of cumulative confirmed cases for a number of countries, sharing the same x axis from January 1st 20202 to the present.</p>
+<p>Show the number of cumulative confirmed cases for a number of countries, sharing the same x axis from January 1st 2020 to the present.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY291bnRyaWVzIDwtIGMoXCJKYXBhblwiLFwiQ2hpbmFcIixcIlVuaXRlZCBTdGF0ZXNcIixcIkNhbmFkYVwiLFwiU3BhaW5cIixcIkl0YWx5XCIsXCJGcmFuY2VcIixcIkdlcm1hbnlcIixcIkN6ZWNoaWFcIixcIk5vcndheVwiLFwiQXVzdHJhbGlhXCIsXCJBcmdlbnRpbmFcIixcIk1vcm9jY29cIixcIlNvdXRoIEtvcmVhXCIsXCJJcmFuXCIsXCJTd2l0emVybGFuZFwiLFwiUnVzc2lhXCIsXCJEZW5tYXJrXCIsXCJTaW5nYXBvcmVcIixcIklzcmFlbFwiLFwiVW5pdGVkIEtpbmdkb21cIilcbnRoaXMuZGF0YSA8LSBkZlt3aGljaChkZiRjb3VudHJpZXNBbmRUZXJyaXRvcmllcyAlaW4lIGNvdW50cmllcyAmIGRmJGN1bXN1bT4xMDApLF1cbmdncGxvdCh0aGlzLmRhdGEsXG4gYWVzKGRhdGVSZXAsIGN1bXN1bSkpICtcbiBnZW9tX2xpbmUoKSArIFxuIHNjYWxlX3lfbG9nMTAoKSArIFxuICBmYWNldF93cmFwKH5jb3VudHJpZXNBbmRUZXJyaXRvcmllcywgbmNvbD0yLCBzY2FsZXM9XCJmcmVlX3lcIilcbmBgYCJ9 -->
@@ -1364,11 +1364,1405 @@ ggplot(this.data,
 <!-- rnb-plot-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>Number of cases per one million people.</p>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGYkY3Vtc3VtLnBlci5lMDYgPC0gKGRmJGN1bXN1bSAvIGRmJHBvcERhdGEyMDE4KSAqIDFFMDZcbnBlci5jYXBpdGEgPC0gZGYgJT4lIGZpbHRlcihkYXRlUmVwID09IGZvcm1hdChTeXMudGltZSgpLFwiJVktJW0tJWRcIikpIFxudmFyczwtYyhcImRhdGVSZXBcIixcImNvdW50cmllc0FuZFRlcnJpdG9yaWVzXCIsXCJjdW1zdW1cIixcInBvcERhdGEyMDE4XCIsXCJjdW1zdW0ucGVyLmUwNlwiKVxua2FibGUocGVyLmNhcGl0YVtvcmRlcihwZXIuY2FwaXRhJGN1bXN1bS5wZXIuZTA2LGRlY3JlYXNpbmc9VFJVRSksdmFyc10pXG5gYGAifQ== -->
+<pre class="r"><code>df$cumsum.per.e06 &lt;- (df$cumsum / df$popData2018) * 1E06
+per.capita &lt;- df %&gt;% filter(dateRep == format(Sys.time(),&quot;%Y-%m-%d&quot;)) 
+vars&lt;-c(&quot;dateRep&quot;,&quot;countriesAndTerritories&quot;,&quot;cumsum&quot;,&quot;popData2018&quot;,&quot;cumsum.per.e06&quot;)
+kable(per.capita[order(per.capita$cumsum.per.e06,decreasing=TRUE),vars])</code></pre>
+<!-- rnb-source-end -->
+
+<!-- rnb-html-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImtuaXRfYXNpcyJdLCJzaXppbmdQb2xpY3kiOltdfX0= -->
+
+<table>
+<thead>
+<tr class="header">
+<th align="left">dateRep</th>
+<th align="left">countriesAndTerritories</th>
+<th align="right">cumsum</th>
+<th align="right">popData2018</th>
+<th align="right">cumsum.per.e06</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">San_Marino</td>
+<td align="right">229</td>
+<td align="right">33785</td>
+<td align="right">6778.1559864</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Holy_See</td>
+<td align="right">6</td>
+<td align="right">1000</td>
+<td align="right">6000.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Andorra</td>
+<td align="right">334</td>
+<td align="right">77006</td>
+<td align="right">4337.3243643</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Faroe_Islands</td>
+<td align="right">159</td>
+<td align="right">48497</td>
+<td align="right">3278.5533126</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Luxembourg</td>
+<td align="right">1950</td>
+<td align="right">607728</td>
+<td align="right">3208.6723008</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Iceland</td>
+<td align="right">1020</td>
+<td align="right">353574</td>
+<td align="right">2884.8275043</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Gibraltar</td>
+<td align="right">65</td>
+<td align="right">33718</td>
+<td align="right">1927.7537220</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Spain</td>
+<td align="right">78797</td>
+<td align="right">46723749</td>
+<td align="right">1686.4442962</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Switzerland</td>
+<td align="right">14274</td>
+<td align="right">8516543</td>
+<td align="right">1676.0321647</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Liechtenstein</td>
+<td align="right">62</td>
+<td align="right">37910</td>
+<td align="right">1635.4523872</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Italy</td>
+<td align="right">97689</td>
+<td align="right">60431283</td>
+<td align="right">1616.5302994</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Monaco</td>
+<td align="right">46</td>
+<td align="right">38682</td>
+<td align="right">1189.1835996</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Austria</td>
+<td align="right">8813</td>
+<td align="right">8847037</td>
+<td align="right">996.1527232</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Belgium</td>
+<td align="right">10836</td>
+<td align="right">11422068</td>
+<td align="right">948.6898520</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Montserrat</td>
+<td align="right">5</td>
+<td align="right">5900</td>
+<td align="right">847.4576271</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Norway</td>
+<td align="right">4102</td>
+<td align="right">5314336</td>
+<td align="right">771.8744167</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Guernsey</td>
+<td align="right">45</td>
+<td align="right">63026</td>
+<td align="right">713.9910513</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Germany</td>
+<td align="right">57298</td>
+<td align="right">82927922</td>
+<td align="right">690.9373661</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Netherlands</td>
+<td align="right">10866</td>
+<td align="right">17231017</td>
+<td align="right">630.6070036</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">France</td>
+<td align="right">40174</td>
+<td align="right">66987244</td>
+<td align="right">599.7261210</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Jersey</td>
+<td align="right">63</td>
+<td align="right">106800</td>
+<td align="right">589.8876404</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Portugal</td>
+<td align="right">5962</td>
+<td align="right">10281762</td>
+<td align="right">579.8617007</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Ireland</td>
+<td align="right">2615</td>
+<td align="right">4853506</td>
+<td align="right">538.7857767</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Estonia</td>
+<td align="right">679</td>
+<td align="right">1320884</td>
+<td align="right">514.0496819</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Isle_of_Man</td>
+<td align="right">42</td>
+<td align="right">84077</td>
+<td align="right">499.5420864</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Israel</td>
+<td align="right">4247</td>
+<td align="right">8883800</td>
+<td align="right">478.0611900</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Aruba</td>
+<td align="right">50</td>
+<td align="right">105845</td>
+<td align="right">472.3888705</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Iran</td>
+<td align="right">38309</td>
+<td align="right">81800269</td>
+<td align="right">468.3236433</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">United_States_of_America</td>
+<td align="right">143025</td>
+<td align="right">327167434</td>
+<td align="right">437.1614811</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Denmark</td>
+<td align="right">2395</td>
+<td align="right">5797446</td>
+<td align="right">413.1129466</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Sweden</td>
+<td align="right">3700</td>
+<td align="right">10183175</td>
+<td align="right">363.3444383</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Slovenia</td>
+<td align="right">730</td>
+<td align="right">2067372</td>
+<td align="right">353.1052950</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Bermuda</td>
+<td align="right">22</td>
+<td align="right">63968</td>
+<td align="right">343.9219610</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Guam</td>
+<td align="right">56</td>
+<td align="right">165768</td>
+<td align="right">337.8215337</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Bahrain</td>
+<td align="right">500</td>
+<td align="right">1569439</td>
+<td align="right">318.5851760</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Malta</td>
+<td align="right">151</td>
+<td align="right">483530</td>
+<td align="right">312.2867247</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Brunei_Darussalam</td>
+<td align="right">126</td>
+<td align="right">428962</td>
+<td align="right">293.7323120</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">United_Kingdom</td>
+<td align="right">19522</td>
+<td align="right">66488991</td>
+<td align="right">293.6125170</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">United_States_Virgin_Islands</td>
+<td align="right">30</td>
+<td align="right">106977</td>
+<td align="right">280.4341120</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Czech_Republic</td>
+<td align="right">2829</td>
+<td align="right">10625695</td>
+<td align="right">266.2414082</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Panama</td>
+<td align="right">989</td>
+<td align="right">4176873</td>
+<td align="right">236.7800026</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Qatar</td>
+<td align="right">634</td>
+<td align="right">2781677</td>
+<td align="right">227.9200640</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Finland</td>
+<td align="right">1218</td>
+<td align="right">5518050</td>
+<td align="right">220.7301492</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Latvia</td>
+<td align="right">376</td>
+<td align="right">1926542</td>
+<td align="right">195.1683379</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">South_Korea</td>
+<td align="right">9661</td>
+<td align="right">51635256</td>
+<td align="right">187.1008444</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Cyprus</td>
+<td align="right">214</td>
+<td align="right">1189265</td>
+<td align="right">179.9430741</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Greenland</td>
+<td align="right">10</td>
+<td align="right">56025</td>
+<td align="right">178.4917448</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Croatia</td>
+<td align="right">713</td>
+<td align="right">4089400</td>
+<td align="right">174.3532058</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Lithuania</td>
+<td align="right">484</td>
+<td align="right">2789533</td>
+<td align="right">173.5057445</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Canada</td>
+<td align="right">6255</td>
+<td align="right">37058856</td>
+<td align="right">168.7855664</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Australia</td>
+<td align="right">4093</td>
+<td align="right">24992369</td>
+<td align="right">163.7699892</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Turks_and_Caicos_islands</td>
+<td align="right">5</td>
+<td align="right">31458</td>
+<td align="right">158.9420815</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Dominica</td>
+<td align="right">11</td>
+<td align="right">71625</td>
+<td align="right">153.5776614</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Singapore</td>
+<td align="right">844</td>
+<td align="right">5638676</td>
+<td align="right">149.6805278</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Armenia</td>
+<td align="right">424</td>
+<td align="right">2951776</td>
+<td align="right">143.6423360</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Montenegro</td>
+<td align="right">85</td>
+<td align="right">622345</td>
+<td align="right">136.5801927</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Saint_Kitts_and_Nevis</td>
+<td align="right">7</td>
+<td align="right">52441</td>
+<td align="right">133.4833432</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">French_Polynesia</td>
+<td align="right">35</td>
+<td align="right">277679</td>
+<td align="right">126.0448215</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Cayman_Islands</td>
+<td align="right">8</td>
+<td align="right">64174</td>
+<td align="right">124.6610777</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">North_Macedonia</td>
+<td align="right">259</td>
+<td align="right">2082958</td>
+<td align="right">124.3424015</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Barbados</td>
+<td align="right">33</td>
+<td align="right">286641</td>
+<td align="right">115.1265869</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Chile</td>
+<td align="right">2139</td>
+<td align="right">18729160</td>
+<td align="right">114.2069372</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">New_Zealand</td>
+<td align="right">552</td>
+<td align="right">4885500</td>
+<td align="right">112.9874117</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Turkey</td>
+<td align="right">9217</td>
+<td align="right">82319724</td>
+<td align="right">111.9658759</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Ecuador</td>
+<td align="right">1890</td>
+<td align="right">17084357</td>
+<td align="right">110.6275173</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Greece</td>
+<td align="right">1156</td>
+<td align="right">10727668</td>
+<td align="right">107.7587412</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Serbia</td>
+<td align="right">741</td>
+<td align="right">6982084</td>
+<td align="right">106.1287719</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Bosnia_and_Herzegovina</td>
+<td align="right">323</td>
+<td align="right">3323929</td>
+<td align="right">97.1741575</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Romania</td>
+<td align="right">1760</td>
+<td align="right">19473936</td>
+<td align="right">90.3772098</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Uruguay</td>
+<td align="right">309</td>
+<td align="right">3449299</td>
+<td align="right">89.5834197</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Mauritius</td>
+<td align="right">110</td>
+<td align="right">1265303</td>
+<td align="right">86.9356984</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Seychelles</td>
+<td align="right">8</td>
+<td align="right">96762</td>
+<td align="right">82.6770840</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Dominican_Republic</td>
+<td align="right">859</td>
+<td align="right">10627165</td>
+<td align="right">80.8305884</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Grenada</td>
+<td align="right">9</td>
+<td align="right">111454</td>
+<td align="right">80.7508030</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Malaysia</td>
+<td align="right">2470</td>
+<td align="right">31528585</td>
+<td align="right">78.3416065</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Moldova</td>
+<td align="right">263</td>
+<td align="right">3545883</td>
+<td align="right">74.1705240</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Albania</td>
+<td align="right">212</td>
+<td align="right">2866376</td>
+<td align="right">73.9609877</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Antigua_and_Barbuda</td>
+<td align="right">7</td>
+<td align="right">96286</td>
+<td align="right">72.7000810</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Sint_Maarten</td>
+<td align="right">3</td>
+<td align="right">41486</td>
+<td align="right">72.3135516</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">British_Virgin_Islands</td>
+<td align="right">2</td>
+<td align="right">29802</td>
+<td align="right">67.1095900</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Lebanon</td>
+<td align="right">438</td>
+<td align="right">6848925</td>
+<td align="right">63.9516420</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Costa_Rica</td>
+<td align="right">314</td>
+<td align="right">4999441</td>
+<td align="right">62.8070218</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Slovakia</td>
+<td align="right">336</td>
+<td align="right">5447011</td>
+<td align="right">61.6852068</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Kuwait</td>
+<td align="right">255</td>
+<td align="right">4137309</td>
+<td align="right">61.6342652</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">China</td>
+<td align="right">82463</td>
+<td align="right">1392730000</td>
+<td align="right">59.2096099</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Curacao</td>
+<td align="right">9</td>
+<td align="right">159849</td>
+<td align="right">56.3031361</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Trinidad_and_Tobago</td>
+<td align="right">78</td>
+<td align="right">1389858</td>
+<td align="right">56.1208411</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">New_Caledonia</td>
+<td align="right">15</td>
+<td align="right">284060</td>
+<td align="right">52.8057453</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Saint_Lucia</td>
+<td align="right">9</td>
+<td align="right">181889</td>
+<td align="right">49.4807273</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Bulgaria</td>
+<td align="right">346</td>
+<td align="right">7024216</td>
+<td align="right">49.2581663</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Poland</td>
+<td align="right">1862</td>
+<td align="right">37978548</td>
+<td align="right">49.0276774</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">United_Arab_Emirates</td>
+<td align="right">468</td>
+<td align="right">9630959</td>
+<td align="right">48.5932917</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Kosovo</td>
+<td align="right">86</td>
+<td align="right">1845300</td>
+<td align="right">46.6048881</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Hungary</td>
+<td align="right">447</td>
+<td align="right">9768785</td>
+<td align="right">45.7579934</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Puerto_Rico</td>
+<td align="right">127</td>
+<td align="right">3195153</td>
+<td align="right">39.7477054</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Saudi_Arabia</td>
+<td align="right">1229</td>
+<td align="right">33699947</td>
+<td align="right">36.4689001</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Bahamas</td>
+<td align="right">14</td>
+<td align="right">385640</td>
+<td align="right">36.3032880</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Oman</td>
+<td align="right">167</td>
+<td align="right">4829483</td>
+<td align="right">34.5792707</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Maldives</td>
+<td align="right">17</td>
+<td align="right">515696</td>
+<td align="right">32.9651578</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Peru</td>
+<td align="right">852</td>
+<td align="right">31989256</td>
+<td align="right">26.6339423</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Jordan</td>
+<td align="right">259</td>
+<td align="right">9956011</td>
+<td align="right">26.0144349</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Georgia</td>
+<td align="right">90</td>
+<td align="right">3731000</td>
+<td align="right">24.1222192</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Tunisia</td>
+<td align="right">278</td>
+<td align="right">11565204</td>
+<td align="right">24.0376218</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Palestine</td>
+<td align="right">106</td>
+<td align="right">4569087</td>
+<td align="right">23.1993832</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">South_Africa</td>
+<td align="right">1280</td>
+<td align="right">57779622</td>
+<td align="right">22.1531390</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Azerbaijan</td>
+<td align="right">209</td>
+<td align="right">9942334</td>
+<td align="right">21.0212210</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Brazil</td>
+<td align="right">4256</td>
+<td align="right">209469333</td>
+<td align="right">20.3180100</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Thailand</td>
+<td align="right">1388</td>
+<td align="right">69428524</td>
+<td align="right">19.9917832</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Djibouti</td>
+<td align="right">19</td>
+<td align="right">958920</td>
+<td align="right">19.8139574</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Argentina</td>
+<td align="right">820</td>
+<td align="right">44494502</td>
+<td align="right">18.4292432</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Kazakhstan</td>
+<td align="right">284</td>
+<td align="right">18276499</td>
+<td align="right">15.5390811</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Japan</td>
+<td align="right">1866</td>
+<td align="right">126529100</td>
+<td align="right">14.7475956</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Honduras</td>
+<td align="right">139</td>
+<td align="right">9587522</td>
+<td align="right">14.4980111</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Iraq</td>
+<td align="right">547</td>
+<td align="right">38433600</td>
+<td align="right">14.2323384</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Colombia</td>
+<td align="right">702</td>
+<td align="right">49648685</td>
+<td align="right">14.1393473</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Suriname</td>
+<td align="right">8</td>
+<td align="right">575991</td>
+<td align="right">13.8891059</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Kyrgyzstan</td>
+<td align="right">84</td>
+<td align="right">6315800</td>
+<td align="right">13.2999778</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Philippines</td>
+<td align="right">1418</td>
+<td align="right">106651922</td>
+<td align="right">13.2955879</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Morocco</td>
+<td align="right">479</td>
+<td align="right">36029138</td>
+<td align="right">13.2947949</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Taiwan</td>
+<td align="right">306</td>
+<td align="right">23780452</td>
+<td align="right">12.8677117</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Cuba</td>
+<td align="right">139</td>
+<td align="right">11338138</td>
+<td align="right">12.2595086</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Jamaica</td>
+<td align="right">34</td>
+<td align="right">2934855</td>
+<td align="right">11.5848994</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Cape_Verde</td>
+<td align="right">6</td>
+<td align="right">543767</td>
+<td align="right">11.0341378</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Algeria</td>
+<td align="right">454</td>
+<td align="right">42228429</td>
+<td align="right">10.7510511</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Equatorial_Guinea</td>
+<td align="right">14</td>
+<td align="right">1308974</td>
+<td align="right">10.6953996</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Russia</td>
+<td align="right">1534</td>
+<td align="right">144478050</td>
+<td align="right">10.6175298</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Guyana</td>
+<td align="right">8</td>
+<td align="right">779004</td>
+<td align="right">10.2695236</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Belarus</td>
+<td align="right">94</td>
+<td align="right">9485386</td>
+<td align="right">9.9099815</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Ukraine</td>
+<td align="right">418</td>
+<td align="right">44622516</td>
+<td align="right">9.3674682</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Paraguay</td>
+<td align="right">64</td>
+<td align="right">6956071</td>
+<td align="right">9.2005961</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Burkina_Faso</td>
+<td align="right">180</td>
+<td align="right">19751535</td>
+<td align="right">9.1132158</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Saint_Vincent_and_the_Grenadines</td>
+<td align="right">1</td>
+<td align="right">110210</td>
+<td align="right">9.0735868</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Senegal</td>
+<td align="right">142</td>
+<td align="right">15854360</td>
+<td align="right">8.9565268</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Bolivia</td>
+<td align="right">96</td>
+<td align="right">11353142</td>
+<td align="right">8.4558090</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Mexico</td>
+<td align="right">993</td>
+<td align="right">126190788</td>
+<td align="right">7.8690372</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Pakistan</td>
+<td align="right">1526</td>
+<td align="right">212215030</td>
+<td align="right">7.1908196</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Cambodia</td>
+<td align="right">107</td>
+<td align="right">16249798</td>
+<td align="right">6.5846972</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Eswatini</td>
+<td align="right">9</td>
+<td align="right">1367000</td>
+<td align="right">6.5837601</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Cote_dIvoire</td>
+<td align="right">165</td>
+<td align="right">25069229</td>
+<td align="right">6.5817740</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Egypt</td>
+<td align="right">576</td>
+<td align="right">98423595</td>
+<td align="right">5.8522552</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Rwanda</td>
+<td align="right">70</td>
+<td align="right">12301939</td>
+<td align="right">5.6901599</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Fiji</td>
+<td align="right">5</td>
+<td align="right">883483</td>
+<td align="right">5.6594185</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Sri_Lanka</td>
+<td align="right">120</td>
+<td align="right">21670000</td>
+<td align="right">5.5376096</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Bhutan</td>
+<td align="right">4</td>
+<td align="right">754394</td>
+<td align="right">5.3022691</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Belize</td>
+<td align="right">2</td>
+<td align="right">383071</td>
+<td align="right">5.2209643</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Ghana</td>
+<td align="right">152</td>
+<td align="right">29767108</td>
+<td align="right">5.1063073</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Indonesia</td>
+<td align="right">1285</td>
+<td align="right">267663435</td>
+<td align="right">4.8008052</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">El_Salvador</td>
+<td align="right">30</td>
+<td align="right">6420744</td>
+<td align="right">4.6723557</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Namibia</td>
+<td align="right">11</td>
+<td align="right">2448255</td>
+<td align="right">4.4929960</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Uzbekistan</td>
+<td align="right">145</td>
+<td align="right">32955400</td>
+<td align="right">4.3998859</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Venezuela</td>
+<td align="right">119</td>
+<td align="right">28870195</td>
+<td align="right">4.1218980</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Cameroon</td>
+<td align="right">99</td>
+<td align="right">25216237</td>
+<td align="right">3.9260418</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Togo</td>
+<td align="right">30</td>
+<td align="right">7889094</td>
+<td align="right">3.8027180</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Mongolia</td>
+<td align="right">12</td>
+<td align="right">3170208</td>
+<td align="right">3.7852406</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Congo</td>
+<td align="right">19</td>
+<td align="right">5244363</td>
+<td align="right">3.6229376</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Gabon</td>
+<td align="right">7</td>
+<td align="right">2119275</td>
+<td align="right">3.3030164</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Afghanistan</td>
+<td align="right">114</td>
+<td align="right">37172386</td>
+<td align="right">3.0667926</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Vietnam</td>
+<td align="right">228</td>
+<td align="right">95540395</td>
+<td align="right">2.3864251</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Guatemala</td>
+<td align="right">36</td>
+<td align="right">17247807</td>
+<td align="right">2.0872219</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Zambia</td>
+<td align="right">29</td>
+<td align="right">17351822</td>
+<td align="right">1.6712942</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Madagascar</td>
+<td align="right">37</td>
+<td align="right">26262368</td>
+<td align="right">1.4088600</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Haiti</td>
+<td align="right">15</td>
+<td align="right">11123176</td>
+<td align="right">1.3485357</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Gambia</td>
+<td align="right">3</td>
+<td align="right">2280102</td>
+<td align="right">1.3157306</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Central_African_Republic</td>
+<td align="right">6</td>
+<td align="right">4666377</td>
+<td align="right">1.2857941</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Libya</td>
+<td align="right">8</td>
+<td align="right">6678567</td>
+<td align="right">1.1978618</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Mauritania</td>
+<td align="right">5</td>
+<td align="right">4403319</td>
+<td align="right">1.1355071</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Guinea_Bissau</td>
+<td align="right">2</td>
+<td align="right">1874309</td>
+<td align="right">1.0670599</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Democratic_Republic_of_the_Congo</td>
+<td align="right">81</td>
+<td align="right">84068091</td>
+<td align="right">0.9635047</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Mali</td>
+<td align="right">18</td>
+<td align="right">19077690</td>
+<td align="right">0.9435105</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Laos</td>
+<td align="right">6</td>
+<td align="right">7061507</td>
+<td align="right">0.8496770</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Kenya</td>
+<td align="right">42</td>
+<td align="right">51393010</td>
+<td align="right">0.8172318</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">India</td>
+<td align="right">1071</td>
+<td align="right">1352617328</td>
+<td align="right">0.7917982</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Timor_Leste</td>
+<td align="right">1</td>
+<td align="right">1267972</td>
+<td align="right">0.7886609</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Uganda</td>
+<td align="right">33</td>
+<td align="right">42723139</td>
+<td align="right">0.7724152</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Guinea</td>
+<td align="right">8</td>
+<td align="right">12414318</td>
+<td align="right">0.6444172</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Liberia</td>
+<td align="right">3</td>
+<td align="right">4818977</td>
+<td align="right">0.6225388</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Syria</td>
+<td align="right">9</td>
+<td align="right">16906283</td>
+<td align="right">0.5323465</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Benin</td>
+<td align="right">6</td>
+<td align="right">11485048</td>
+<td align="right">0.5224184</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Nigeria</td>
+<td align="right">97</td>
+<td align="right">195874740</td>
+<td align="right">0.4952144</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Zimbabwe</td>
+<td align="right">7</td>
+<td align="right">14439018</td>
+<td align="right">0.4847975</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Nicaragua</td>
+<td align="right">3</td>
+<td align="right">6465513</td>
+<td align="right">0.4640003</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Niger</td>
+<td align="right">10</td>
+<td align="right">22442948</td>
+<td align="right">0.4455743</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Chad</td>
+<td align="right">5</td>
+<td align="right">15477751</td>
+<td align="right">0.3230443</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Bangladesh</td>
+<td align="right">49</td>
+<td align="right">161356039</td>
+<td align="right">0.3036763</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Mozambique</td>
+<td align="right">8</td>
+<td align="right">29495962</td>
+<td align="right">0.2712236</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">United_Republic_of_Tanzania</td>
+<td align="right">14</td>
+<td align="right">56318348</td>
+<td align="right">0.2485868</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Angola</td>
+<td align="right">7</td>
+<td align="right">30809762</td>
+<td align="right">0.2272007</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Somalia</td>
+<td align="right">3</td>
+<td align="right">15008154</td>
+<td align="right">0.1998913</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Nepal</td>
+<td align="right">5</td>
+<td align="right">28087871</td>
+<td align="right">0.1780128</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Myanmar</td>
+<td align="right">8</td>
+<td align="right">53708395</td>
+<td align="right">0.1489525</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Ethiopia</td>
+<td align="right">16</td>
+<td align="right">109224559</td>
+<td align="right">0.1464872</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Sudan</td>
+<td align="right">5</td>
+<td align="right">41801533</td>
+<td align="right">0.1196128</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Papua_New_Guinea</td>
+<td align="right">1</td>
+<td align="right">8606316</td>
+<td align="right">0.1161937</td>
+</tr>
+<tr class="even">
+<td align="left">2020-03-30</td>
+<td align="left">Anguilla</td>
+<td align="right">2</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-30</td>
+<td align="left">Eritrea</td>
+<td align="right">12</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+
+
+<!-- rnb-html-end -->
+
+<!-- rnb-chunk-end -->
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIk5vdGVib29rIG9mIENPVklELTE5IGFuYWx5c2VzIg0KYXV0aG9yOiAiRGFuaWVsIFJpY2FyZCAoZGFuaWVsLnJpY2FyZEBnbWFpbC5jb20pIg0KZGF0ZTogJ2ByIHBhc3RlMCgiTGFzdCBtb2RpZmllZCB0aW1lc3RhcDogIiwgZm9ybWF0KFN5cy50aW1lKCksICIlWS0lbS0lZCAlSDolTTolUyIpKWAnDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojIENvbnRleHQNCk5vdGVzIGFib3V0IGFuYWx5c2VzIG9mIENPVklELTE5IGRhdGEuIA0KDQojIFdvcmxkd2lkZSBjYXNlcw0KVXNpbmcgaW5mb3JtYXRpb24gbWFkZSBhdmFpbGFibGUgZnJvbSB0aGUgW0V1cm9wZWFuIENlbnRyZSBmb3IgRGlzZWFzZSBQcmV2ZW50aW9uIGFuZCBDb250cm9sXShodHRwczovL3d3dy5lY2RjLmV1cm9wYS5ldS9lbi9wdWJsaWNhdGlvbnMtZGF0YS9kb3dubG9hZC10b2RheXMtZGF0YS1nZW9ncmFwaGljLWRpc3RyaWJ1dGlvbi1jb3ZpZC0xOS1jYXNlcy13b3JsZHdpZGUpLg0KDQoNCmBgYHtyfQ0KIyMgdGhpcyBpcyBjb3BpZWQgYW5kIHBhc3RlZCBmcm9tIHRoZSBFQ0RDIHdlYnNpdGUNCg0KI3RoZXNlIGxpYnJhcmllcyBuZWVkIHRvIGJlIGxvYWRlZA0KbGlicmFyeSh1dGlscykNCmxpYnJhcnkoaHR0cikNCg0KI2Rvd25sb2FkIHRoZSBkYXRhc2V0IGZyb20gdGhlIEVDREMgd2Vic2l0ZSB0byBhIGxvY2FsIHRlbXBvcmFyeSBmaWxlDQpHRVQoImh0dHBzOi8vb3BlbmRhdGEuZWNkYy5ldXJvcGEuZXUvY292aWQxOS9jYXNlZGlzdHJpYnV0aW9uL2NzdiIsIGF1dGhlbnRpY2F0ZSgiOiIsICI6IiwgdHlwZT0ibnRsbSIpLCB3cml0ZV9kaXNrKHRmIDwtIHRlbXBmaWxlKGZpbGVleHQgPSAiLmNzdiIpKSkNCg0KI3JlYWQgdGhlIERhdGFzZXQgc2hlZXQgaW50byDigJxS4oCdLiBUaGUgZGF0YXNldCB3aWxsIGJlIGNhbGxlZCAiZGF0YSIuDQpkYXRhIDwtIHJlYWQuY3N2KHRmKQ0KDQojIyBEUg0KZGF0YSRkYXRlUmVwIDwtIGFzLkRhdGUoZGF0YSRkYXRlUmVwLCBmb3JtYXQ9IiVkLyVtLyVZIikgIyMgRFIsIGluY29taW5nIGRhdGEgaXMgZm9ybWF0dGVkIGRheS9tb250aC95ZWFyIGFuZCB3YXMgbm90IHJlY29nbmlzZWQgY29ycmVjdGx5IGFzIGEgZGF0ZQ0KIyMgY29tcHV0ZSB0aGUgY3VtdWxhdGl2ZSBudW1iZXIgb2YgY2FzZXMgYnkgY291bnRyeQ0KbGlicmFyeShkcGx5cikNCmRmIDwtIGRhdGFbb3JkZXIoZGF0YSRjb3VudHJpZXNBbmRUZXJyaXRvcmllcywgZGF0YSRkYXRlUmVwKSxdICU+JSBncm91cF9ieShjb3VudHJpZXNBbmRUZXJyaXRvcmllcykgJT4lIG11dGF0ZShjdW1zdW0gPSBjdW1zdW0oY2FzZXMpKQ0KDQpgYGANCg0KDQojIyBOdW1iZXIgb2YgY29uZmlybWVkIGNhc2VzIHZzLiB0aW1lLCBwbG90IGZvciB0aGUgdG9wIDIwIGNvdW50cmllcyBiYXNlZCBvbiBudW1iZXIgb2YgY29uZmlybWVkIGNhc2VzDQoNCmBgYHtyLCBmaWcuaGVpZ2h0PTYsIGZpZy53aWR0aD04fQ0KbGlicmFyeShkcGx5cikNCiNvYnRhaW4gdG9wIDIwIGNvdW50cnkNCnRvcDIwIDwtIHVuZ3JvdXAoZGYpICU+JSBmaWx0ZXIoZGF0ZVJlcCA9PSBmb3JtYXQoU3lzLnRpbWUoKSwiJVktJW0tJWQiKSkgJT4lDQogdG9wX24obj0yMCwgd3Q9Y3Vtc3VtKSAlPiUNCiBhcnJhbmdlKGRlc2MoY3Vtc3VtKSkNCg0KI3Bsb3QgdG9wIDIwDQoNCnJlcXVpcmUoZ2dwbG90MikNCnJlcXVpcmUoZ2dyZXBlbCkNCg0KDQpnIDwtIGdncGxvdChmaWx0ZXIoZGYsIGNvdW50cmllc0FuZFRlcnJpdG9yaWVzICVpbiUgdG9wMjAkY291bnRyaWVzQW5kVGVycml0b3JpZXMpLCAjZGYkZGF0ZVJlcCA+ICIyMDIwLTAxLTAxIiksDQogYWVzKGRhdGVSZXAsIGN1bXN1bSwgY29sb3I9Y291bnRyaWVzQW5kVGVycml0b3JpZXMpKSArDQogZ2VvbV9saW5lKCkgKw0KIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWw9Y291bnRyaWVzQW5kVGVycml0b3JpZXMpLA0KIGZ1bmN0aW9uKGQpIGRbZCRkYXRlUmVwID09IGZvcm1hdChTeXMudGltZSgpLCIlWS0lbS0lZCIpLF0pICsNCiB0aGVtZV9taW5pbWFsKGJhc2Vfc2l6ZT0xNCkgKw0KIHRoZW1lKGxlZ2VuZC5wb3NpdGlvbiA9ICJub25lIikgKw0KICB5bGFiKCJDdW11bGF0aXZlIGNvbmZpcm1lZCBudW1iZXIgb2YgY2FzZXMiKSArDQogIGdndGl0bGUoIlRvcCAyMCBjb3VudHJpZXMgLSBjdW11bGF0aXZlIikNCmcNCiMjIGFuZCBpbiBsb2cgc3BhY2UNCmcgKyBzY2FsZV95X2xvZzEwKCkNCg0KYGBgDQoNCg0KIyMgTnVtYmVyIG9mIGNvbmZpcm1lZCBjYXNlcywgYXMgYSB0YWJsZQ0KDQpgYGB7cn0NCmZvci5rYWJsZSA8LSB1bmdyb3VwKGRmKSAlPiUgZmlsdGVyKGRhdGVSZXAgPT0gZm9ybWF0KFN5cy50aW1lKCksIiVZLSVtLSVkIikpICU+JQ0KIGFycmFuZ2UoZGVzYyhjdW1zdW0pKQ0KYGBgDQoNClRoZXJlIHdlcmUgYHIgc3VtKGZvci5rYWJsZSRjdW1zdW0pYCBjb25maXJtZWQgY2FzZXMgYXMgdGhpcyBkb2N1bWVudCB3YXMgZ2VuZXJhdGVkIChgciBmb3JtYXQoU3lzLnRpbWUoKSwgIiVZLSVtLSVkICVIOiVNOiVTIilgKS4gQSB0b3RhbCBvZiBgciBucm93KGZvci5rYWJsZSlgIGNvdW50cmllcyBoYWQgQ09WSUQtMTkgcmVwb3J0ZWQgY2FzZXMsIGFuZCBgciBucm93KGZvci5rYWJsZVtmb3Iua2FibGUkY3Vtc3VtPjEwMCxdKWAgY291bnRyaWVzIGhhZCBtb3JlIHRoYW4gMTAwIHJlcG9ydGVkIGNhc2VzLg0KDQpgYGB7ciwgcmVzdWx0cz0iYXNpcyIsIGZpZy5jYXA9IkN1bXVsYXRpdmUgbnVtYmVyIG9mIGNvbmZpcm1lZCBDT1ZJRC0xOSBjYXNlcyBieSBjb3VudHJ5LiJ9DQpsaWJyYXJ5KGtuaXRyKQ0KdmFycyA8LSBjKCJjb3VudHJpZXNBbmRUZXJyaXRvcmllcyIsICJjdW1zdW0iKQ0Ka2FibGUoY2JpbmQocmFuaz0xOm5yb3coZm9yLmthYmxlKSxmb3Iua2FibGVbLHZhcnNdKSwgcm93Lm5hbWVzID0gRkFMU0UpDQpgYGANCg0KDQpBbiBhbHRlcm5hdGl2ZSBpcyB0byBwcmVzZW50IHRoZSBudW1iZXIgb2YgY3VtdWxhdGl2ZSBjYXNlcyBzdGFydGluZyBvbiB0aGUgZGF0ZSB3aGVuIDEwMCBvciBtb3JlIGNhc2VzIHdlcmUgcmVjb3JkZWQgaW4gZWFjaCBjb3VudHJ5LCBhbmQgYWxzbyB0byB1c2UgYSBsb2dhcml0aG1pYyBzY2FsZSBmb3IgdGhlIHkgYXhpcy4gDQoNCmBgYHtyLCBmaWcuaGVpZ2h0PTYsIGZpZy53aWR0aD04fQ0KZmlyc3QuZGF5LjEwMCA8LSBhZ2dyZWdhdGUoZGF0ZVJlcH5jb3VudHJpZXNBbmRUZXJyaXRvcmllcywgZGF0YT1kZlt3aGljaChkZiRjdW1zdW0+PTEwMCksXSxtaW4pDQpkMiA8LSBtZXJnZShkZiwgZmlyc3QuZGF5LjEwMCwgYnk9ImNvdW50cmllc0FuZFRlcnJpdG9yaWVzIikNCmQyJGRheXMuc2luY2UuMTAwIDwtIGQyJGRhdGVSZXAueCAtIGQyJGRhdGVSZXAueQ0KDQpuIDwtIGQyICU+JSBmaWx0ZXIoZGF0ZVJlcC54ID09IGZvcm1hdChTeXMudGltZSgpLCIlWS0lbS0lZCIpKSAlPiUNCiB0b3BfbigyMCwgY3Vtc3VtKSAlPiUNCiBhcnJhbmdlKGRlc2MoY3Vtc3VtKSkNCg0KDQojcGxvdCB0b3AgMjANCg0KZzwtDQpkMiAlPiUNCiAgZmlsdGVyKGNvdW50cmllc0FuZFRlcnJpdG9yaWVzICVpbiUgbiRjb3VudHJpZXNBbmRUZXJyaXRvcmllcywgYXMubnVtZXJpYyhkMiRkYXlzLnNpbmNlLjEwMCk+MCkgJT4lDQogIGdncGxvdChhZXMoYXMubnVtZXJpYyhkYXlzLnNpbmNlLjEwMCksIGN1bXN1bSwgZ3JvdXA9Y291bnRyaWVzQW5kVGVycml0b3JpZXMsIGNvbG9yPWNvdW50cmllc0FuZFRlcnJpdG9yaWVzKSkgKw0KIGdlb21fbGluZSgpICsNCiB0aGVtZV9taW5pbWFsKGJhc2Vfc2l6ZT0xNCkgKw0KICB5bGFiKCJDdW11bGF0aXZlIGNvbmZpcm1lZCBudW1iZXIgb2YgY2FzZXMiKSArDQogIGdndGl0bGUoIlRvcCAyMCBjb3VudHJpZXMgLSBjdW11bGF0aXZlIikNCg0KI2cNCiMgYW5kIGluIGxvZyBzcGFjZQ0KZyArIHNjYWxlX3lfbG9nMTAoKQ0KDQpgYGANCg0KDQoNCiMjIEEgZmV3IGNvdW50cmllcyBpbiBtb3JlIGRldGFpbHMNCkJlZm9yZSBmaXR0aW5nIGV4cG9uZW50aWFsIGFuZCBsb2dpc3RpYyBncm93dGggbW9kZWxzIHRvIHRoZSBhdmFpbGFibGUgZGF0YSwgbGV0J3MgbG9vayBhdCBhIGZldyBjb3VudHJpZXMgc2VwYXJhdGVseS4NCg0KU2hvdyB0aGUgbnVtYmVyIG9mIGN1bXVsYXRpdmUgY29uZmlybWVkIGNhc2VzIGZvciBhIG51bWJlciBvZiBjb3VudHJpZXMsIHNoYXJpbmcgdGhlIHNhbWUgeCBheGlzIGZyb20gSmFudWFyeSAxc3QgMjAyMDIgdG8gdGhlIHByZXNlbnQuDQoNCmBgYHtyLCBmaWcuYXNwPTV9DQoNCmNvdW50cmllcyA8LSBjKCJKYXBhbiIsIkNoaW5hIiwiVW5pdGVkIFN0YXRlcyIsIkNhbmFkYSIsIlNwYWluIiwiSXRhbHkiLCJGcmFuY2UiLCJHZXJtYW55IiwiQ3plY2hpYSIsIk5vcndheSIsIkF1c3RyYWxpYSIsIkFyZ2VudGluYSIsIk1vcm9jY28iLCJTb3V0aCBLb3JlYSIsIklyYW4iLCJTd2l0emVybGFuZCIsIlJ1c3NpYSIsIkRlbm1hcmsiLCJTaW5nYXBvcmUiLCJJc3JhZWwiLCJVbml0ZWQgS2luZ2RvbSIpDQoNCnRoaXMuZGF0YSA8LSBkZlt3aGljaChkZiRjb3VudHJpZXNBbmRUZXJyaXRvcmllcyAlaW4lIGNvdW50cmllcyAmIGRmJGN1bXN1bT4xMDApLF0NCg0KZ2dwbG90KHRoaXMuZGF0YSwNCiBhZXMoZGF0ZVJlcCwgY3Vtc3VtKSkgKw0KIGdlb21fbGluZSgpICsgDQogc2NhbGVfeV9sb2cxMCgpICsgDQogIGZhY2V0X3dyYXAofmNvdW50cmllc0FuZFRlcnJpdG9yaWVzLCBuY29sPTIsIHNjYWxlcz0iZnJlZV95IikNCg0KYGBgDQoNCg0K</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIk5vdGVib29rIG9mIENPVklELTE5IGFuYWx5c2VzIg0KYXV0aG9yOiAiRGFuaWVsIFJpY2FyZCAoZGFuaWVsLnJpY2FyZEBnbWFpbC5jb20pIg0KZGF0ZTogJ2ByIHBhc3RlMCgiTGFzdCBtb2RpZmllZCB0aW1lc3RhcDogIiwgZm9ybWF0KFN5cy50aW1lKCksICIlWS0lbS0lZCAlSDolTTolUyIpKWAnDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojIENvbnRleHQNCk5vdGVzIGFib3V0IGFuYWx5c2VzIG9mIENPVklELTE5IGRhdGEuIA0KDQojIFdvcmxkd2lkZSBjYXNlcw0KVXNpbmcgaW5mb3JtYXRpb24gbWFkZSBhdmFpbGFibGUgZnJvbSB0aGUgW0V1cm9wZWFuIENlbnRyZSBmb3IgRGlzZWFzZSBQcmV2ZW50aW9uIGFuZCBDb250cm9sXShodHRwczovL3d3dy5lY2RjLmV1cm9wYS5ldS9lbi9wdWJsaWNhdGlvbnMtZGF0YS9kb3dubG9hZC10b2RheXMtZGF0YS1nZW9ncmFwaGljLWRpc3RyaWJ1dGlvbi1jb3ZpZC0xOS1jYXNlcy13b3JsZHdpZGUpLg0KDQoNCmBgYHtyfQ0KIyMgdGhpcyBpcyBjb3BpZWQgYW5kIHBhc3RlZCBmcm9tIHRoZSBFQ0RDIHdlYnNpdGUNCg0KI3RoZXNlIGxpYnJhcmllcyBuZWVkIHRvIGJlIGxvYWRlZA0KbGlicmFyeSh1dGlscykNCmxpYnJhcnkoaHR0cikNCg0KI2Rvd25sb2FkIHRoZSBkYXRhc2V0IGZyb20gdGhlIEVDREMgd2Vic2l0ZSB0byBhIGxvY2FsIHRlbXBvcmFyeSBmaWxlDQpHRVQoImh0dHBzOi8vb3BlbmRhdGEuZWNkYy5ldXJvcGEuZXUvY292aWQxOS9jYXNlZGlzdHJpYnV0aW9uL2NzdiIsIGF1dGhlbnRpY2F0ZSgiOiIsICI6IiwgdHlwZT0ibnRsbSIpLCB3cml0ZV9kaXNrKHRmIDwtIHRlbXBmaWxlKGZpbGVleHQgPSAiLmNzdiIpKSkNCg0KI3JlYWQgdGhlIERhdGFzZXQgc2hlZXQgaW50byDigJxS4oCdLiBUaGUgZGF0YXNldCB3aWxsIGJlIGNhbGxlZCAiZGF0YSIuDQpkYXRhIDwtIHJlYWQuY3N2KHRmKQ0KDQojIyBEUg0KZGF0YSRkYXRlUmVwIDwtIGFzLkRhdGUoZGF0YSRkYXRlUmVwLCBmb3JtYXQ9IiVkLyVtLyVZIikgIyMgRFIsIGluY29taW5nIGRhdGEgaXMgZm9ybWF0dGVkIGRheS9tb250aC95ZWFyIGFuZCB3YXMgbm90IHJlY29nbmlzZWQgY29ycmVjdGx5IGFzIGEgZGF0ZQ0KIyMgY29tcHV0ZSB0aGUgY3VtdWxhdGl2ZSBudW1iZXIgb2YgY2FzZXMgYnkgY291bnRyeQ0KbGlicmFyeShkcGx5cikNCmRmIDwtIGRhdGFbb3JkZXIoZGF0YSRjb3VudHJpZXNBbmRUZXJyaXRvcmllcywgZGF0YSRkYXRlUmVwKSxdICU+JSBncm91cF9ieShjb3VudHJpZXNBbmRUZXJyaXRvcmllcykgJT4lIG11dGF0ZShjdW1zdW0gPSBjdW1zdW0oY2FzZXMpKQ0KDQpgYGANCg0KDQojIyBOdW1iZXIgb2YgY29uZmlybWVkIGNhc2VzIHZzLiB0aW1lLCBwbG90IGZvciB0aGUgdG9wIDIwIGNvdW50cmllcyBiYXNlZCBvbiBudW1iZXIgb2YgY29uZmlybWVkIGNhc2VzDQoNCmBgYHtyLCBmaWcuaGVpZ2h0PTYsIGZpZy53aWR0aD04fQ0KbGlicmFyeShkcGx5cikNCiNvYnRhaW4gdG9wIDIwIGNvdW50cnkNCnRvcDIwIDwtIHVuZ3JvdXAoZGYpICU+JSBmaWx0ZXIoZGF0ZVJlcCA9PSBmb3JtYXQoU3lzLnRpbWUoKSwiJVktJW0tJWQiKSkgJT4lDQogdG9wX24obj0yMCwgd3Q9Y3Vtc3VtKSAlPiUNCiBhcnJhbmdlKGRlc2MoY3Vtc3VtKSkNCg0KI3Bsb3QgdG9wIDIwDQoNCnJlcXVpcmUoZ2dwbG90MikNCnJlcXVpcmUoZ2dyZXBlbCkNCg0KDQpnIDwtIGdncGxvdChmaWx0ZXIoZGYsIGNvdW50cmllc0FuZFRlcnJpdG9yaWVzICVpbiUgdG9wMjAkY291bnRyaWVzQW5kVGVycml0b3JpZXMpLCAjZGYkZGF0ZVJlcCA+ICIyMDIwLTAxLTAxIiksDQogYWVzKGRhdGVSZXAsIGN1bXN1bSwgY29sb3I9Y291bnRyaWVzQW5kVGVycml0b3JpZXMpKSArDQogZ2VvbV9saW5lKCkgKw0KIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWw9Y291bnRyaWVzQW5kVGVycml0b3JpZXMpLA0KIGZ1bmN0aW9uKGQpIGRbZCRkYXRlUmVwID09IGZvcm1hdChTeXMudGltZSgpLCIlWS0lbS0lZCIpLF0pICsNCiB0aGVtZV9taW5pbWFsKGJhc2Vfc2l6ZT0xNCkgKw0KIHRoZW1lKGxlZ2VuZC5wb3NpdGlvbiA9ICJub25lIikgKw0KICB5bGFiKCJDdW11bGF0aXZlIGNvbmZpcm1lZCBudW1iZXIgb2YgY2FzZXMiKSArDQogIGdndGl0bGUoIlRvcCAyMCBjb3VudHJpZXMgLSBjdW11bGF0aXZlIikNCmcNCiMjIGFuZCBpbiBsb2cgc3BhY2UNCmcgKyBzY2FsZV95X2xvZzEwKCkNCg0KYGBgDQoNCg0KIyMgTnVtYmVyIG9mIGNvbmZpcm1lZCBjYXNlcywgYXMgYSB0YWJsZQ0KDQpgYGB7cn0NCmZvci5rYWJsZSA8LSB1bmdyb3VwKGRmKSAlPiUgZmlsdGVyKGRhdGVSZXAgPT0gZm9ybWF0KFN5cy50aW1lKCksIiVZLSVtLSVkIikpICU+JQ0KIGFycmFuZ2UoZGVzYyhjdW1zdW0pKQ0KYGBgDQoNClRoZXJlIHdlcmUgYHIgc3VtKGZvci5rYWJsZSRjdW1zdW0pYCBjb25maXJtZWQgY2FzZXMgYXMgdGhpcyBkb2N1bWVudCB3YXMgZ2VuZXJhdGVkIChgciBmb3JtYXQoU3lzLnRpbWUoKSwgIiVZLSVtLSVkICVIOiVNOiVTIilgKS4gQSB0b3RhbCBvZiBgciBucm93KGZvci5rYWJsZSlgIGNvdW50cmllcyBoYWQgQ09WSUQtMTkgcmVwb3J0ZWQgY2FzZXMsIGFuZCBgciBucm93KGZvci5rYWJsZVtmb3Iua2FibGUkY3Vtc3VtPjEwMCxdKWAgY291bnRyaWVzIGhhZCBtb3JlIHRoYW4gMTAwIHJlcG9ydGVkIGNhc2VzLg0KDQpgYGB7ciwgcmVzdWx0cz0iYXNpcyIsIGZpZy5jYXA9IkN1bXVsYXRpdmUgbnVtYmVyIG9mIGNvbmZpcm1lZCBDT1ZJRC0xOSBjYXNlcyBieSBjb3VudHJ5LiJ9DQpsaWJyYXJ5KGtuaXRyKQ0KdmFycyA8LSBjKCJjb3VudHJpZXNBbmRUZXJyaXRvcmllcyIsICJjdW1zdW0iKQ0Ka2FibGUoY2JpbmQocmFuaz0xOm5yb3coZm9yLmthYmxlKSxmb3Iua2FibGVbLHZhcnNdKSwgcm93Lm5hbWVzID0gRkFMU0UpDQpgYGANCg0KDQpBbiBhbHRlcm5hdGl2ZSBpcyB0byBwcmVzZW50IHRoZSBudW1iZXIgb2YgY3VtdWxhdGl2ZSBjYXNlcyBzdGFydGluZyBvbiB0aGUgZGF0ZSB3aGVuIDEwMCBvciBtb3JlIGNhc2VzIHdlcmUgcmVjb3JkZWQgaW4gZWFjaCBjb3VudHJ5LCBhbmQgYWxzbyB0byB1c2UgYSBsb2dhcml0aG1pYyBzY2FsZSBmb3IgdGhlIHkgYXhpcy4gDQoNCmBgYHtyLCBmaWcuaGVpZ2h0PTYsIGZpZy53aWR0aD04fQ0KZmlyc3QuZGF5LjEwMCA8LSBhZ2dyZWdhdGUoZGF0ZVJlcH5jb3VudHJpZXNBbmRUZXJyaXRvcmllcywgZGF0YT1kZlt3aGljaChkZiRjdW1zdW0+PTEwMCksXSxtaW4pDQpkMiA8LSBtZXJnZShkZiwgZmlyc3QuZGF5LjEwMCwgYnk9ImNvdW50cmllc0FuZFRlcnJpdG9yaWVzIikNCmQyJGRheXMuc2luY2UuMTAwIDwtIGQyJGRhdGVSZXAueCAtIGQyJGRhdGVSZXAueQ0KDQpuIDwtIGQyICU+JSBmaWx0ZXIoZGF0ZVJlcC54ID09IGZvcm1hdChTeXMudGltZSgpLCIlWS0lbS0lZCIpKSAlPiUNCiB0b3BfbigyMCwgY3Vtc3VtKSAlPiUNCiBhcnJhbmdlKGRlc2MoY3Vtc3VtKSkNCg0KDQojcGxvdCB0b3AgMjANCg0KZzwtDQpkMiAlPiUNCiAgZmlsdGVyKGNvdW50cmllc0FuZFRlcnJpdG9yaWVzICVpbiUgbiRjb3VudHJpZXNBbmRUZXJyaXRvcmllcywgYXMubnVtZXJpYyhkMiRkYXlzLnNpbmNlLjEwMCk+MCkgJT4lDQogIGdncGxvdChhZXMoYXMubnVtZXJpYyhkYXlzLnNpbmNlLjEwMCksIGN1bXN1bSwgZ3JvdXA9Y291bnRyaWVzQW5kVGVycml0b3JpZXMsIGNvbG9yPWNvdW50cmllc0FuZFRlcnJpdG9yaWVzKSkgKw0KIGdlb21fbGluZSgpICsNCiB0aGVtZV9taW5pbWFsKGJhc2Vfc2l6ZT0xNCkgKw0KICB5bGFiKCJDdW11bGF0aXZlIGNvbmZpcm1lZCBudW1iZXIgb2YgY2FzZXMiKSArDQogIGdndGl0bGUoIlRvcCAyMCBjb3VudHJpZXMgLSBjdW11bGF0aXZlIikNCg0KI2cNCiMgYW5kIGluIGxvZyBzcGFjZQ0KZyArIHNjYWxlX3lfbG9nMTAoKQ0KDQpgYGANCg0KDQoNCiMjIEEgZmV3IGNvdW50cmllcyBpbiBtb3JlIGRldGFpbHMNCkJlZm9yZSBmaXR0aW5nIGV4cG9uZW50aWFsIGFuZCBsb2dpc3RpYyBncm93dGggbW9kZWxzIHRvIHRoZSBhdmFpbGFibGUgZGF0YSwgbGV0J3MgbG9vayBhdCBhIGZldyBjb3VudHJpZXMgc2VwYXJhdGVseS4NCg0KU2hvdyB0aGUgbnVtYmVyIG9mIGN1bXVsYXRpdmUgY29uZmlybWVkIGNhc2VzIGZvciBhIG51bWJlciBvZiBjb3VudHJpZXMsIHNoYXJpbmcgdGhlIHNhbWUgeCBheGlzIGZyb20gSmFudWFyeSAxc3QgMjAyMCB0byB0aGUgcHJlc2VudC4NCg0KYGBge3IsIGZpZy5hc3A9NX0NCg0KY291bnRyaWVzIDwtIGMoIkphcGFuIiwiQ2hpbmEiLCJVbml0ZWQgU3RhdGVzIiwiQ2FuYWRhIiwiU3BhaW4iLCJJdGFseSIsIkZyYW5jZSIsIkdlcm1hbnkiLCJDemVjaGlhIiwiTm9yd2F5IiwiQXVzdHJhbGlhIiwiQXJnZW50aW5hIiwiTW9yb2NjbyIsIlNvdXRoIEtvcmVhIiwiSXJhbiIsIlN3aXR6ZXJsYW5kIiwiUnVzc2lhIiwiRGVubWFyayIsIlNpbmdhcG9yZSIsIklzcmFlbCIsIlVuaXRlZCBLaW5nZG9tIikNCg0KdGhpcy5kYXRhIDwtIGRmW3doaWNoKGRmJGNvdW50cmllc0FuZFRlcnJpdG9yaWVzICVpbiUgY291bnRyaWVzICYgZGYkY3Vtc3VtPjEwMCksXQ0KDQpnZ3Bsb3QodGhpcy5kYXRhLA0KIGFlcyhkYXRlUmVwLCBjdW1zdW0pKSArDQogZ2VvbV9saW5lKCkgKyANCiBzY2FsZV95X2xvZzEwKCkgKyANCiAgZmFjZXRfd3JhcCh+Y291bnRyaWVzQW5kVGVycml0b3JpZXMsIG5jb2w9Miwgc2NhbGVzPSJmcmVlX3kiKQ0KDQpgYGANCg0KDQpOdW1iZXIgb2YgY2FzZXMgcGVyIG9uZSBtaWxsaW9uIHBlb3BsZS4NCg0KYGBge3J9DQpkZiRjdW1zdW0ucGVyLmUwNiA8LSAoZGYkY3Vtc3VtIC8gZGYkcG9wRGF0YTIwMTgpICogMUUwNg0KcGVyLmNhcGl0YSA8LSBkZiAlPiUgZmlsdGVyKGRhdGVSZXAgPT0gZm9ybWF0KFN5cy50aW1lKCksIiVZLSVtLSVkIikpIA0KdmFyczwtYygiZGF0ZVJlcCIsImNvdW50cmllc0FuZFRlcnJpdG9yaWVzIiwiY3Vtc3VtIiwicG9wRGF0YTIwMTgiLCJjdW1zdW0ucGVyLmUwNiIpDQprYWJsZShwZXIuY2FwaXRhW29yZGVyKHBlci5jYXBpdGEkY3Vtc3VtLnBlci5lMDYsZGVjcmVhc2luZz1UUlVFKSx2YXJzXSkNCg0KYGBgDQo=</div>
 
 
 

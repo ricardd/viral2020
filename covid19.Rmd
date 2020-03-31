@@ -115,7 +115,7 @@ g + scale_y_log10()
 ## A few countries in more details
 Before fitting exponential and logistic growth models to the available data, let's look at a few countries separately.
 
-Show the number of cumulative confirmed cases for a number of countries, sharing the same x axis from January 1st 20202 to the present.
+Show the number of cumulative confirmed cases for a number of countries, sharing the same x axis from January 1st 2020 to the present.
 
 ```{r, fig.asp=5}
 
@@ -132,3 +132,13 @@ ggplot(this.data,
 ```
 
 
+Number of cases per one million people. The top of this list is composed of places with small populations.
+
+
+```{r}
+df$cumsum.per.e06 <- (df$cumsum / df$popData2018) * 1E06
+per.capita <- df %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) 
+vars<-c("dateRep","countriesAndTerritories","cumsum","popData2018","cumsum.per.e06")
+kable(per.capita[order(per.capita$cumsum.per.e06,decreasing=TRUE),vars])
+
+```

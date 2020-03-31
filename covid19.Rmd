@@ -138,6 +138,10 @@ Number of cases per one million people. The top of this list is composed of plac
 ```{r}
 df$cumsum.per.e06 <- (df$cumsum / df$popData2018) * 1E06
 per.capita <- df %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) 
+
+ggplot(per.capita, aes(cumsum.per.e06)) +
+  geom_histogram()
+
 vars<-c("dateRep","countriesAndTerritories","cumsum","popData2018","cumsum.per.e06")
 kable(per.capita[order(per.capita$cumsum.per.e06,decreasing=TRUE),vars])
 

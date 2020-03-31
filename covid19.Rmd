@@ -24,24 +24,26 @@ GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate
 
 #read the Dataset sheet into “R”. The dataset will be called "data".
 data <- read.csv(tf)
-
+names(data)[1] <- "dateRep"
 ## DR
-data$dateRep <- as.Date(data$dateRep, format="%d-%m-%Y") ## DR, incoming data is formatted day/month/year and was not recognised correctly as a date
+data$dateRep <- as.Date(data$dateRep, format="%d/%m/%Y") ## DR, incoming data is formatted day/month/year and was not recognised correctly as a date
 ## compute the cumulative number of cases by country
+## compute the cumulative number of fatalities by country
 library(dplyr)
-df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(countriesAndTerritories) %>% mutate(cumsum = cumsum(cases))
+df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(countriesAndTerritories) %>% mutate(cumsum.cases = cumsum(cases)) %>% mutate(cumsum.deaths = cumsum(deaths))
+
+
 
 ```
 
+## Number of fatalities vs. time, plot for the top 20 countries based on number of fatalities
 
-## Number of confirmed cases vs. time, plot for the top 20 countries based on number of confirmed cases
-
-```{r, fig.height=6, fig.width=8}
+```{r fatalities, fig.height=6, fig.width=8}
 library(dplyr)
 #obtain top 20 country
 top20 <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
- top_n(n=20, wt=cumsum) %>%
- arrange(desc(cumsum))
+ top_n(n=20, wt=cumsum.deaths) %>%
+ arrange(desc(cumsum.deaths))
 
 #plot top 20
 
@@ -50,7 +52,39 @@ require(ggrepel)
 
 
 g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), 
- aes(dateRep, cumsum, color=countriesAndTerritories)) +
+ aes(dateRep, cumsum.deaths, color=countriesAndTerritories)) +
+ geom_line() +
+ geom_text_repel(aes(label=countriesAndTerritories),
+ function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +
+ theme_minimal(base_size=14) +
+ theme(legend.position = "none") +
+  ylab("Cumulative number of deaths") +
+  ggtitle("Top 20 countries - cumulative")
+g
+## and in log space
+g + scale_y_log10()
+
+```
+
+
+
+## Number of confirmed cases vs. time, plot for the top 20 countries based on number of confirmed cases
+
+```{r cases, fig.height=6, fig.width=8}
+library(dplyr)
+#obtain top 20 country
+top20 <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=20, wt=cumsum.cases) %>%
+ arrange(desc(cumsum.cases))
+
+#plot top 20
+
+require(ggplot2)
+require(ggrepel)
+
+
+g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories), 
+ aes(dateRep, cumsum.cases, color=countriesAndTerritories)) +
  geom_line() +
  geom_text_repel(aes(label=countriesAndTerritories),
  function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +
@@ -72,7 +106,7 @@ This [YouTube video](https://www.youtube.com/watch?v=54XLXg4fYsc&feature=youtu.b
 
 
 g <- 
-  ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories, cases>0), aes(cumsum, cases)) +
+  ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories, cases>0), aes(cumsum.cases, cases)) +
   geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
   scale_x_log10() +
   scale_y_log10()
@@ -84,14 +118,14 @@ g
 
 ```{r}
 for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
- arrange(desc(cumsum))
+ arrange(desc(cumsum.cases))
 ```
 
 There were `r sum(for.kable$cumsum)` confirmed cases as this document was generated (`r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum>100,])` countries had more than 100 reported cases.
 
 ```{r, results="asis", fig.cap="Cumulative number of confirmed COVID-19 cases by country."}
 library(knitr)
-vars <- c("countriesAndTerritories", "cumsum")
+vars <- c("countriesAndTerritories", "cumsum.cases")
 kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
 ```
 
@@ -99,13 +133,13 @@ kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
 An alternative is to present the number of cumulative cases starting on the date when 100 or more cases were recorded in each country, and also to use a logarithmic scale for the y axis. 
 
 ```{r, fig.height=6, fig.width=8}
-first.day.100 <- aggregate(dateRep~countriesAndTerritories, data=df[which(df$cumsum>=100),],min)
+first.day.100 <- aggregate(dateRep~countriesAndTerritories, data=df[which(df$cumsum.cases>=100),],min)
 d2 <- merge(df, first.day.100, by="countriesAndTerritories")
 d2$days.since.100 <- d2$dateRep.x - d2$dateRep.y
 
 n <- d2 %>% filter(dateRep.x == format(Sys.time(),"%Y-%m-%d")) %>%
- top_n(20, cumsum) %>%
- arrange(desc(cumsum))
+ top_n(20, cumsum.cases) %>%
+ arrange(desc(cumsum.cases))
 
 
 #plot top 20
@@ -113,7 +147,7 @@ n <- d2 %>% filter(dateRep.x == format(Sys.time(),"%Y-%m-%d")) %>%
 g<-
 d2 %>%
   filter(countriesAndTerritories %in% n$countriesAndTerritories, as.numeric(d2$days.since.100)>0) %>%
-  ggplot(aes(as.numeric(days.since.100), cumsum, group=countriesAndTerritories, color=countriesAndTerritories)) +
+  ggplot(aes(as.numeric(days.since.100), cumsum.cases, group=countriesAndTerritories, color=countriesAndTerritories)) +
  geom_line() +
  theme_minimal(base_size=14) +
   ylab("Cumulative confirmed number of cases") +
@@ -136,10 +170,10 @@ Show the number of cumulative confirmed cases for a number of countries, sharing
 
 countries <- c("Japan","China","United States","Canada","Spain","Italy","France","Germany","Czechia","Norway","Australia","Argentina","Morocco","South Korea","Iran","Switzerland","Russia","Denmark","Singapore","Israel","United Kingdom")
 
-this.data <- df[which(df$countriesAndTerritories %in% countries & df$cumsum>100),]
+this.data <- df[which(df$countriesAndTerritories %in% countries & df$cumsum.cases>100),]
 
 ggplot(this.data,
- aes(dateRep, cumsum)) +
+ aes(dateRep, cumsum.cases)) +
  geom_line() + 
  scale_y_log10() + 
   facet_wrap(~countriesAndTerritories, ncol=2, scales="free_y")
@@ -159,46 +193,46 @@ my.logistic <- function(a=90, b=0.1, c=1E03, ti){
 
 
 southkoreadata <- d2 %>%
-  filter(countriesAndTerritories == "South_Korea" & cumsum>100) %>%
-  select(countriesAndTerritories,dateRep.x,cumsum,cases,days.since.100)
+  filter(countriesAndTerritories == "South_Korea" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep.x,cumsum.cases,cases,days.since.100)
 
-sk.lm <- lm(log(cumsum)~dateRep.x, data=southkoreadata)
-sk.lm.pred <- data.frame(dateRep.x=southkoreadata$dateRep, cumsum=exp(fitted(sk.lm)))
+sk.lm <- lm(log(cumsum.cases)~dateRep.x, data=southkoreadata)
+sk.lm.pred <- data.frame(dateRep.x=southkoreadata$dateRep, cumsum.cases=exp(fitted(sk.lm)))
 
-sk.logistic <- nls(cumsum ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=southkoreadata, start=list(a=5E03,b=1.2,c=1E04))
-sk.logistic.pred <- data.frame(dateRep=southkoreadata$dateRep.x, days.since.100=as.numeric(southkoreadata$days.since.100), cumsum=fitted(sk.logistic))
+sk.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=southkoreadata, start=list(a=5E03,b=1.2,c=1E04))
+sk.logistic.pred <- data.frame(dateRep=southkoreadata$dateRep.x, days.since.100=as.numeric(southkoreadata$days.since.100), cumsum.cases=fitted(sk.logistic))
 
-g <- ggplot(southkoreadata, aes(dateRep.x, cumsum)) +
+g <- ggplot(southkoreadata, aes(dateRep.x, cumsum.cases)) +
   geom_line() +
-  geom_line(data=sk.lm.pred, aes(dateRep.x, cumsum, color="exponential model"), linetype=2) +
-  geom_line(data=sk.logistic.pred, aes(dateRep, cumsum, color="logistic model"), linetype=1) +
+  geom_line(data=sk.lm.pred, aes(dateRep.x, cumsum.cases, color="exponential model"), linetype=2) +
+  geom_line(data=sk.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
   guides(color=guide_legend("Model type")) +
   ggtitle("South Korea")
 g
 
 ## US
 usdata <- d2 %>%
-  filter(countriesAndTerritories == "United_States_of_America" & cumsum>100) %>%
-  select(countriesAndTerritories,dateRep.x,cumsum,cases,days.since.100)
-us.lm <- lm(log(cumsum)~dateRep.x, data=usdata)
-us.lm.pred <- data.frame(dateRep.x=usdata$dateRep, cumsum=exp(fitted(us.lm)))
+  filter(countriesAndTerritories == "United_States_of_America" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep.x,cumsum.cases,cases,days.since.100)
+us.lm <- lm(log(cumsum.cases)~dateRep.x, data=usdata)
+us.lm.pred <- data.frame(dateRep.x=usdata$dateRep, cumsum.cases=exp(fitted(us.lm)))
 #us.logistic 
 
-us.logistic <- nls(cumsum ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=usdata, start=list(a=1E03,b=0.28,c=2E05))
+us.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=usdata, start=list(a=1E03,b=0.28,c=2E05))
 
 a=1E03
 b=0.28
 c=2E05
-#plot(usdata$days.since.100, usdata$cumsum)
+#plot(usdata$days.since.100, usdata$cumsum.cases)
 #points(usdata$days.since.100, my.logistic(a,b,c,as.numeric(usdata$days.since.100)), pch=19, col="red")
 
 
-us.logistic.pred <- data.frame(dateRep=usdata$dateRep.x, days.since.100=as.numeric(usdata$days.since.100), cumsum=fitted(us.logistic))
+us.logistic.pred <- data.frame(dateRep=usdata$dateRep.x, days.since.100=as.numeric(usdata$days.since.100), cumsum.cases=fitted(us.logistic))
 
-ggplot(usdata, aes(dateRep.x, cumsum)) +
+ggplot(usdata, aes(dateRep.x, cumsum.cases)) +
   geom_line() +
-  geom_line(data=us.lm.pred, aes(dateRep.x, cumsum, color="exponential model"), linetype=2) +
- # geom_line(data=sk.logistic.pred, aes(dateRep, cumsum, color="logistic model"), linetype=1) +
+  geom_line(data=us.lm.pred, aes(dateRep.x, cumsum.cases, color="exponential model"), linetype=2) +
+ # geom_line(data=sk.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
   guides(color=guide_legend("Model type")) +
   ggtitle("United States")
 
@@ -212,14 +246,14 @@ Number of cases per one million people. The top of this list is composed of plac
 
 
 ```{r}
-df$cumsum.per.e06 <- (df$cumsum / df$popData2018) * 1E06
+df$cumsum.cases.per.e06 <- (df$cumsum.cases / df$popData2018) * 1E06
 per.capita <- df %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) 
 
-ggplot(per.capita, aes(cumsum.per.e06)) +
+ggplot(per.capita, aes(cumsum.cases.per.e06)) +
   geom_histogram()
 
-vars<-c("dateRep","countriesAndTerritories","cumsum","popData2018","cumsum.per.e06")
-kable(per.capita[order(per.capita$cumsum.per.e06,decreasing=TRUE),vars])
+vars<-c("dateRep","countriesAndTerritories","cumsum.cases","popData2018","cumsum.cases.per.e06")
+kable(per.capita[order(per.capita$cumsum.cases.per.e06,decreasing=TRUE),vars])
 
 ```
 

@@ -311,6 +311,45 @@ ggplot(canadadata, aes(dateRep.x, R.3day.avg)) +
   ylim(0,1.8) +
   ggtitle("Canada - R values by day, using a 3 day moving average")
 
+
+## Italy
+italydata <- d2 %>%
+  filter(countriesAndTerritories == "Italy" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep.x,cumsum.cases,cases,days.since.100)
+italy.lm <- lm(log(cumsum.cases)~dateRep.x, data=italydata)
+italy.lm.pred <- data.frame(dateRep.x=italydata$dateRep, cumsum.cases=exp(fitted(italy.lm)))
+
+italy.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=italydata, start=list(a=5E03,b=1.2,c=1.5E05))
+italy.logistic.pred <- data.frame(dateRep=italydata$dateRep.x, days.since.100=as.numeric(italydata$days.since.100), cumsum.cases=fitted(italy.logistic))
+
+
+ggplot(italydata, aes(dateRep.x, cumsum.cases)) +
+  geom_line() +
+  geom_line(data=italy.lm.pred, aes(dateRep.x, cumsum.cases, color="exponential model"), linetype=2) +
+  geom_line(data=italy.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("Italy") 
+
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+italydata$cases.3day.avg <- NA
+oo <- order(italydata$dateRep.x)
+italydata <- italydata[oo,] # order by date
+
+days <- seq(from=range(italydata$dateRep.x)[1]+2,to=range(italydata$dateRep.x)[2],1)
+for(d in days){
+  l1 <- which(italydata$dateRep.x==d)
+  italydata[l1,"cases.3day.avg"] <- mean(italydata[l1:(l1-2),"cases"])
+}
+
+italydata$R.3day.avg <- italydata$cases.3day.avg / lag(italydata$cases.3day.avg)
+
+ggplot(italydata, aes(dateRep.x, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("Italy - R values by day, using a 3 day moving average")
+
 ```
 
 

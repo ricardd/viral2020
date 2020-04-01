@@ -9,7 +9,7 @@ output: html_notebook
 Notes about analyses of COVID-19 data. Inspired by [an article on Towards Data Science](https://towardsdatascience.com/visualize-the-pandemic-with-r-covid-19-c3443de3b4e4)
 
 # Worldwide cases
-Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and updated on a daily basis. There are likely other sources that are updated more regularly (e.g. the many sources used by [worldometers] (https://www.worldometers.info/coronavirus/) uses), but this is a decent starting point.
+Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and updated on a daily basis. There are likely other sources that are updated more regularly (e.g. the many sources used by [worldometers](https://www.worldometers.info/coronavirus/) uses), but this is a decent starting point.
 
 
 ```{r}
@@ -35,6 +35,13 @@ df$death.rate.percent <- 100*(df$cumsum.deaths / df$cumsum.cases)
 df$cases.per.e06 <- (df$cumsum.cases / df$popData2018)*1E06
 df$deaths.per.e06 <- (df$cumsum.deaths / df$popData2018)*1E06
 ```
+
+```{r}
+for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ arrange(desc(cumsum.cases))
+```
+
+There were `r format(sum(for.kable$cumsum.cases),big.mark=",")` confirmed cases and `r format(sum(for.kable$cumsum.deaths),big.mark=",")` deaths as this document was generated using the data obtained from the ECDC (HTML generated `r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
 
 ## Number of fatalities vs. time, plot for the top 20 countries based on number of fatalities
 
@@ -115,13 +122,6 @@ g
 
 
 ## Number of confirmed cases, as a table
-
-```{r}
-for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
- arrange(desc(cumsum.cases))
-```
-
-There were `r format(sum(for.kable$cumsum.cases),big.mark=",")` confirmed cases and `r format(sum(for.kable$cumsum.deaths),big.mark=",")` deaths as this document was generated using the data obtained from the ECDC (HTML generated `r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
 
 ```{r, results="asis"}
 library(knitr)

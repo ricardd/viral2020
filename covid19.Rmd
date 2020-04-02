@@ -186,7 +186,7 @@ country.fct("US")
 country.fct("IT")
 country.fct("ES")
 country.fct("CN")
-country.fct("DE")
+#country.fct("DE")
 country.fct("FR")
 country.fct("IR")
 country.fct("UK")
@@ -383,7 +383,7 @@ italydata <- df2 %>%
 italy.lm <- lm(log(cumsum.cases)~dateRep.x, data=italydata)
 italy.lm.pred <- data.frame(dateRep.x=italydata$dateRep, cumsum.cases=exp(fitted(italy.lm)))
 
-italy.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=italydata, start=list(a=5E03,b=1.2,c=1.5E05))
+italy.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=italydata, start=list(a=5E03,b=1,c=1.5E05))
 italy.logistic.pred <- data.frame(dateRep=italydata$dateRep.x, days.since.100=as.numeric(italydata$days.since.100), cumsum.cases=fitted(italy.logistic))
 
 

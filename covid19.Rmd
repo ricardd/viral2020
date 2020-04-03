@@ -150,8 +150,9 @@ g
 How are different countries doing? I am testing a function that takes a country as an argument and fits both an exponential growth and a logistic growth model to the number of cumulative cases.
 
 ```{r}
-my.logistic.fct <- function(a=90, b=0.1, c=1E03, ti){
-  out <- c / (1 + (a*exp(-b*ti)))
+my.logistic.fct <- function(b=0.1, c=1E03, ti){
+  a<-100
+  out <- c / (1 + (((c-a)/a)*exp(-b*ti)))
   return(out)
 }
 
@@ -160,16 +161,21 @@ country.fct <- function(g.id){
 
   ## 1500 cases per one million as a starting value for the asymptote c
   c.init <- 1500 * (unique(this.df$popData2018)/1E06)
-  a.init <- c.init/100
+  #a.init <- c.init/100
     
   my.lm <- lm(log(cumsum.cases)~days.since.100, data=this.df)
   pred.lm <- data.frame(dateRep=this.df$dateRep.x, cumsum.cases=exp(fitted(my.lm)))
   
-  my.logistic <- nls(cumsum.cases ~ my.logistic.fct(a,b,c,as.numeric(days.since.100)), data=this.df, start=list(a=a.init,b=0.4,c=c.init))
+  my.logistic <- nls(cumsum.cases ~ my.logistic.fct(b,c,as.numeric(days.since.100)), data=this.df, start=list(b=0.34,c=c.init))
   logistic.pred <- data.frame(dateRep=this.df$dateRep.x, days.since.100=as.numeric(this.df$days.since.100), cumsum.cases=fitted(my.logistic))
-    
+  ## inflection point
+  t50 <- (log((coef(my.logistic)[2]-100)/100) - log(1))/coef(my.logistic)[1]
+  n50 <- my.logistic.fct(coef(my.logistic)[1], coef(my.logistic)[2], ti=t50)
+  logistic.text <- paste0("Inflection point: ", round(t50,0), " days and ", round(n50,0), " cases")
+  
   country.name <- paste0(as.character(unique(this.df$countriesAndTerritories)), " - ", format(max(this.df$cumsum.cases),big.mark=","), " cumulative cases")
     
+  
   g<-ggplot(this.df, aes(dateRep.x, cumsum.cases)) +
     geom_line(aes(color="data")) +
     geom_point(aes(color="data")) +
@@ -177,8 +183,12 @@ country.fct <- function(g.id){
     geom_line(data=logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
     guides(color=guide_legend("Model type")) +
     ggtitle(country.name) +
+    geom_point(aes(x=min(dateRep.x)+t50, y=n50)) +
+    annotate("text",x=min(this.df$dateRep.x)+(as.numeric(diff(range(this.df$dateRep.x)))*0.4), y=n50, label=logistic.text) +
     ylim(0,max(this.df$cumsum.cases)*1.2)
-    g
+
+  g
+    
 }
 
 
@@ -186,25 +196,31 @@ country.fct("US")
 country.fct("IT")
 country.fct("ES")
 country.fct("CN")
-#country.fct("DE")
-country.fct("FR")
+country.fct("DE")
+#country.fct("FR")
 country.fct("IR")
 country.fct("UK")
 country.fct("CH")
-country.fct("TR")
+#country.fct("TR")
 country.fct("BE")
 country.fct("NL")
 country.fct("AT")
-#country.fct("KR")
+country.fct("KR")
 country.fct("CA")
 country.fct("PT")
 #country.fct("BR")
 country.fct("IL")
-country.fct("AU")
+#country.fct("AU")
 country.fct("NO")
 
 country.fct("CZ")
 
+#test.df <- data.frame(
+#  ti=0:50)
+#test.df$y <- my.logistic.fct(a=10, b=0.2, c=1E03, ti=test.df$ti)
+
+#(log(100) - log(1))/0.2
+#test.df[test.df$ti==23,]
 ```
 
 
@@ -383,7 +399,7 @@ italydata <- df2 %>%
 italy.lm <- lm(log(cumsum.cases)~dateRep.x, data=italydata)
 italy.lm.pred <- data.frame(dateRep.x=italydata$dateRep, cumsum.cases=exp(fitted(italy.lm)))
 
-italy.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=italydata, start=list(a=5E03,b=1,c=1.5E05))
+italy.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100)), data=italydata, start=list(a=5E03,b=1.1,c=1.5E05))
 italy.logistic.pred <- data.frame(dateRep=italydata$dateRep.x, days.since.100=as.numeric(italydata$days.since.100), cumsum.cases=fitted(italy.logistic))
 
 

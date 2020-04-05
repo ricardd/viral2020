@@ -9,7 +9,7 @@ output: html_notebook
 Notes about analyses of COVID-19 data. Inspired by [an article on Towards Data Science](https://towardsdatascience.com/visualize-the-pandemic-with-r-covid-19-c3443de3b4e4). This document is an R markdown notebook available from my personal [viral2020 GitHub repository](https://github.com/ricardd/viral2020/). 
 
 # Worldwide cases
-Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and updated on a daily basis. There are likely other sources that are updated more regularly (e.g. the many sources used by [worldometers](https://www.worldometers.info/coronavirus/) uses), but this is a decent starting point.
+Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and updated on a daily basis. There are likely other sources that are updated more regularly (e.g. the many sources used by [worldometers](https://www.worldometers.info/coronavirus/)), but this is a decent starting point.
 
 ```{r, include=FALSE}
 ## this is copied and pasted from the ECDC website

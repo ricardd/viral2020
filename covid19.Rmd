@@ -6,9 +6,9 @@ output: html_notebook
 ---
 
 # Context
-Notes about analyses of COVID-19 data. Inspired by [an article on Towards Data Science](https://towardsdatascience.com/visualize-the-pandemic-with-r-covid-19-c3443de3b4e4). This document is an R markdown notebook available from my personal [viral2020 GitHub repository](https://github.com/ricardd/viral2020/). 
+Notes about analyses of COVID-19 data. Inspired by [an article on Towards Data Science](https://towardsdatascience.com/visualize-the-pandemic-with-r-covid-19-c3443de3b4e4). This document is an R markdown notebook available from my personal [viral2020 GitHub repository](https://github.com/ricardd/viral2020/).
 
-# Worldwide cases
+# Worldwide cases and mortalities
 Using information made available from the [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) and updated on a daily basis. There are likely other sources that are updated more regularly (e.g. the many sources used by [worldometers](https://www.worldometers.info/coronavirus/)), but this is a decent starting point.
 
 ```{r, include=FALSE}
@@ -35,29 +35,77 @@ df$cases.per.e06 <- (df$cumsum.cases / df$popData2018)*1E06
 df$deaths.per.e06 <- (df$cumsum.deaths / df$popData2018)*1E06
 ```
 
+```{r, include=FALSE}
+## https://datahub.io/JohnSnowLabs/country-and-continent-codes-list
+continent.df <- read.csv("country-and-continent-codes-list-csv_csv.txt")
+
+```
+
 ```{r, echo=FALSE}
+## a table showing today's number of cases in decreasing order
 for.kable <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
  arrange(desc(cumsum.cases))
 ```
 
-There were `r format(sum(for.kable$cumsum.cases),big.mark=",")` confirmed cases and `r format(sum(for.kable$cumsum.deaths),big.mark=",")` deaths as this document was generated using the data obtained from the ECDC (HTML document generated `r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
+Worldwide, there were `r format(sum(for.kable$cumsum.cases),big.mark=",")` confirmed cases and `r format(sum(for.kable$cumsum.deaths),big.mark=",")` deaths as this document was generated using the data obtained from the ECDC (HTML document generated `r format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")`). A total of `r nrow(for.kable)` countries had COVID-19 reported cases, and `r nrow(for.kable[for.kable$cumsum.cases>100,])` countries had more than 100 reported cases.
+
+## Number of new deaths vs. cumulative deaths
+
+This [YouTube video](https://www.youtube.com/watch?v=54XLXg4fYsc&feature=youtu.be&fbclid=IwAR2SRKtyPt9AuW-JPh4jn1E4Fk4s2rRRqPCvM_X6t62Bxgg9ulDV-HJrbfg) makes a number of great suggestions to look at the COVID-19 information on confirmed cases and fatalities. One suggestion is to plot the number of new deaths or cases as a function of the cumulative number of deaths or cases and to use a log scale on both axes. SO let's do this for deaths.
+
+```{r, fig.height=6, fig.width=8, echo=FALSE}
+library(dplyr)
+#obtain top 20 and 10 country for fatalities
+top20.deaths <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=20, wt=cumsum.deaths) %>%
+ arrange(desc(cumsum.deaths))
+
+top10.deaths <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=10, wt=cumsum.deaths) %>%
+ arrange(desc(cumsum.deaths))
+
+library(ggplot2)
+g <- 
+  ggplot(filter(df, countriesAndTerritories %in% top10.deaths$countriesAndTerritories, deaths>0, cumsum.deaths>=10), aes(cumsum.deaths, deaths)) +
+  geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
+  scale_x_log10() +
+  scale_y_log10()
+g
+```
+
+And the same but using the number of confirmed cases instead.
+
+```{r, fig.height=6, fig.width=8, echo=FALSE}
+#obtain top 20 and 10 country for fatalities
+top20.cases <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=20, wt=cumsum.cases) %>%
+ arrange(desc(cumsum.cases))
+
+top10.cases <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=10, wt=cumsum.cases) %>%
+ arrange(desc(cumsum.cases))
+
+g <- 
+  ggplot(filter(df, countriesAndTerritories %in% top20.cases$countriesAndTerritories, cases>0), aes(cumsum.cases, cases)) +
+  geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
+  scale_x_log10() +
+  scale_y_log10()
+g
+```
+
+Now do the same thing with fatalities.
+
 
 ## Number of fatalities vs. time, plot for the top 20 countries based on number of fatalities
 
 ```{r fatalities, fig.height=6, fig.width=8, echo=FALSE}
-library(dplyr)
-#obtain top 20 country
-top20 <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
- top_n(n=20, wt=cumsum.deaths) %>%
- arrange(desc(cumsum.deaths))
-
 #plot top 20
 
 require(ggplot2)
 require(ggrepel)
 
 
-g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories, cases>0), 
+g <- ggplot(filter(df, countriesAndTerritories %in% top20.deaths$countriesAndTerritories, cases>0), 
  aes(dateRep, cumsum.deaths, color=countriesAndTerritories)) +
  geom_line() +
  geom_text_repel(aes(label=countriesAndTerritories),
@@ -79,17 +127,13 @@ g + scale_y_log10()
 ```{r cases, fig.height=6, fig.width=8, echo=FALSE}
 library(dplyr)
 #obtain top 20 country
-top20 <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
- top_n(n=20, wt=cumsum.cases) %>%
- arrange(desc(cumsum.cases))
-
 #plot top 20
 
 require(ggplot2)
 require(ggrepel)
 
 
-g <- ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories, cases>0), 
+g <- ggplot(filter(df, countriesAndTerritories %in% top20.cases$countriesAndTerritories, cases>0), 
  aes(dateRep, cumsum.cases, color=countriesAndTerritories)) +
  geom_line() +
  geom_text_repel(aes(label=countriesAndTerritories),
@@ -135,19 +179,6 @@ g + scale_y_log10()
 ```
 
 
-## Number of active cases vs. cumulative
-
-This [YouTube video](https://www.youtube.com/watch?v=54XLXg4fYsc&feature=youtu.be&fbclid=IwAR2SRKtyPt9AuW-JPh4jn1E4Fk4s2rRRqPCvM_X6t62Bxgg9ulDV-HJrbfg) makes a number of great suggestions to look at the COVID-19 information on confirmed cases. One suggestion is to plot the number of new cases as a function of the cumulative number of cases and to use a log scale on both axes.
-
-```{r, fig.height=6, fig.width=8, echo=FALSE}
-
-g <- 
-  ggplot(filter(df, countriesAndTerritories %in% top20$countriesAndTerritories, cases>0), aes(cumsum.cases, cases)) +
-  geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
-  scale_x_log10() +
-  scale_y_log10()
-g
-```
 
 
 ## Country-level summaries
@@ -206,7 +237,7 @@ country.deaths.fct <- function(g.id){
   pred.lm <- data.frame(dateRep=this.df$dateRep, cumsum.deaths=exp(fitted(my.lm)))
   
   my.logistic <- nls(cumsum.deaths ~ my.logistic.fct(a=10, b,c,as.numeric(days.since.10.deaths)), data=this.df, start=list(b=0.34,c=c.init))
-  logistic.pred <- data.frame(dateRep=this.df$dateRep, days.since.100=as.numeric(this.df$days.since.100), cumsum.deaths=fitted(my.logistic))
+  logistic.pred <- data.frame(dateRep=this.df$dateRep, days.since.10.deaths=as.numeric(this.df$days.since.10.deaths), cumsum.deaths=fitted(my.logistic))
   ## inflection point
   t50 <- (log((coef(my.logistic)[2]-10)/10) - log(1))/coef(my.logistic)[1]
   n50 <- my.logistic.fct(a=10, coef(my.logistic)[1], coef(my.logistic)[2], ti=t50)

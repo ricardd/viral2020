@@ -51,7 +51,7 @@ Worldwide, there were `r format(sum(for.kable$cumsum.cases),big.mark=",")` confi
 
 ## Number of new deaths vs. cumulative deaths
 
-This [YouTube video](https://www.youtube.com/watch?v=54XLXg4fYsc&feature=youtu.be&fbclid=IwAR2SRKtyPt9AuW-JPh4jn1E4Fk4s2rRRqPCvM_X6t62Bxgg9ulDV-HJrbfg) makes a number of great suggestions to look at the COVID-19 information on confirmed cases and fatalities. One suggestion is to plot the number of new deaths or cases as a function of the cumulative number of deaths or cases and to use a log scale on both axes. SO let's do this for deaths.
+This [YouTube video](https://www.youtube.com/watch?v=54XLXg4fYsc&feature=youtu.be&fbclid=IwAR2SRKtyPt9AuW-JPh4jn1E4Fk4s2rRRqPCvM_X6t62Bxgg9ulDV-HJrbfg) makes a number of great suggestions to look at the COVID-19 information on confirmed cases and fatalities. One suggestion is to plot the number of new deaths or cases as a function of the cumulative number of deaths or cases and to use a log scale on both axes. So let's do this for the number of deaths in the 10 countries with the most fatalities.
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 library(dplyr)
@@ -338,10 +338,11 @@ ggplot(this.data,
 Fit exponential and logistic models to the data to see whether some countries are seeing a decrease in the number of cases. Let's take South Korea, the United States and Canada as examples to start.
 
 ```{r}
-my.logistic <- function(a=90, b=0.1, c=1E03, ti){
-  out <- c / (1 + (a*exp(-b*ti)))
+my.logistic.fct <- function(a=100, b=0.1, c=1E03, ti){
+  out <- c / (1 + (((c-a)/a)*exp(-b*ti)))
   return(out)
 }
+
 #time <- 0:100
 #plot(x=time,y=my.logistic(ti=time))
 
@@ -353,7 +354,7 @@ southkoreadata <- df2 %>%
 sk.lm <- lm(log(cumsum.cases)~dateRep, data=southkoreadata)
 sk.lm.pred <- data.frame(dateRep=southkoreadata$dateRep, cumsum.cases=exp(fitted(sk.lm)))
 
-sk.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100.cases)), data=southkoreadata, start=list(a=5E03,b=1.2,c=1E04))
+sk.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=southkoreadata, start=list(b=1.2,c=1E04))
 sk.logistic.pred <- data.frame(dateRep=southkoreadata$dateRep, days.since.100.cases=as.numeric(southkoreadata$days.since.100.cases), cumsum.cases=fitted(sk.logistic))
 
 g <- ggplot(southkoreadata, aes(dateRep, cumsum.cases)) +
@@ -392,10 +393,10 @@ us.lm <- lm(log(cumsum.cases)~dateRep, data=usdata)
 us.lm.pred <- data.frame(dateRep=usdata$dateRep, cumsum.cases=exp(fitted(us.lm)))
 #us.logistic 
 
-us.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100.cases)), data=usdata, start=list(a=1E03,b=0.28,c=1E06))
+us.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=usdata, start=list(b=0.28,c=1E06))
 us.logistic.pred <- data.frame(dateRep=usdata$dateRep, days.since.100.cases=as.numeric(usdata$days.since.100.cases), cumsum.cases=fitted(us.logistic))
 long.df <- data.frame(days.since.100.cases=0:60)
-us.logistic.pred.long <-data.frame(dateRep=seq(min(usdata$dateRep),min(usdata$dateRep)+60,1), days.since.100.cases=0:60, cumsum.cases=my.logistic(coef(us.logistic)[1], coef(us.logistic)[2], coef(us.logistic)[3], ti=long.df$days.since.100.cases))
+us.logistic.pred.long <-data.frame(dateRep=seq(min(usdata$dateRep),min(usdata$dateRep)+60,1), days.since.100.cases=0:60, cumsum.cases=my.logistic.fct(a=100, b=coef(us.logistic)[1], c=coef(us.logistic)[2], ti=long.df$days.since.100.cases))
 
 ggplot(usdata, aes(dateRep, cumsum.cases)) +
   geom_line(aes(color="data")) +
@@ -435,11 +436,11 @@ canadadata <- df2 %>%
 canada.lm <- lm(log(cumsum.cases)~dateRep, data=canadadata)
 canada.lm.pred <- data.frame(dateRep=canadadata$dateRep, cumsum.cases=exp(fitted(canada.lm)))
 
-canada.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100.cases)), data=canadadata, start=list(a=1E03,b=0.3,c=1E04))
+canada.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=canadadata, start=list(b=0.3,c=1E04))
 canada.logistic.pred <- data.frame(dateRep=canadadata$dateRep, days.since.100.cases=as.numeric(canadadata$days.since.100.cases), cumsum.cases=fitted(canada.logistic))
 
 long.df <- data.frame(days.since.100.cases=0:60)
-canada.logistic.pred.long <-data.frame(dateRep=seq(min(canadadata$dateRep),min(canadadata$dateRep)+60,1), days.since.100.cases=0:60, cumsum.cases=my.logistic(coef(canada.logistic)[1], coef(canada.logistic)[2], coef(canada.logistic)[3], ti=long.df$days.since.100.cases))
+canada.logistic.pred.long <-data.frame(dateRep=seq(min(canadadata$dateRep),min(canadadata$dateRep)+60,1), days.since.100.cases=0:60, cumsum.cases=my.logistic.fct(a=100, b=coef(canada.logistic)[1], c=coef(canada.logistic)[2], ti=long.df$days.since.100.cases))
 
 ggplot(canadadata, aes(dateRep, cumsum.cases)) +
   geom_line(aes(color="data")) +
@@ -479,7 +480,7 @@ italydata <- df2 %>%
 italy.lm <- lm(log(cumsum.cases)~dateRep, data=italydata)
 italy.lm.pred <- data.frame(dateRep=italydata$dateRep, cumsum.cases=exp(fitted(italy.lm)))
 
-italy.logistic <- nls(cumsum.cases ~ my.logistic(a,b,c,as.numeric(days.since.100.cases)), data=italydata, start=list(a=5E03,b=0.7,c=2E05))
+italy.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=italydata, start=list(b=0.7,c=3E05))
 italy.logistic.pred <- data.frame(dateRep=italydata$dateRep, days.since.100.cases=as.numeric(italydata$days.since.100.cases), cumsum.cases=fitted(italy.logistic))
 
 

@@ -65,6 +65,8 @@ top10.deaths <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d"))
  arrange(desc(cumsum.deaths))
 
 library(ggplot2)
+require(ggrepel)
+
 g <- 
   ggplot(filter(df, countriesAndTerritories %in% top10.deaths$countriesAndTerritories, deaths>0, cumsum.deaths>=10), aes(cumsum.deaths, deaths)) +
   geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
@@ -209,7 +211,7 @@ country.cases.fct <- function(g.id){
   pred.lm <- data.frame(dateRep=this.df$dateRep, cumsum.cases=exp(fitted(my.lm)))
   
   initial.num.cases <- this.df[as.numeric(this.df$days.since.100.cases)==1,"cumsum.cases"]
-  my.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=initial.num.cases, b,c,as.numeric(days.since.100.cases)), data=this.df, start=list(b=0.34,c=c.init))
+  my.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=initial.num.cases, b,c,as.numeric(days.since.100.cases)), data=this.df, start=list(b=0.4,c=c.init))
   logistic.pred <- data.frame(dateRep=this.df$dateRep, days.since.100.cases=as.numeric(this.df$days.since.100.cases), cumsum.cases=fitted(my.logistic))
   ## inflection point
   t50 <- (log((coef(my.logistic)[2]-initial.num.cases)/initial.num.cases) - log(1))/coef(my.logistic)[1]
@@ -256,7 +258,7 @@ country.cases.fct("IL")
 country.cases.fct("AU")
 country.cases.fct("NO")
 
-country.cases.fct("CZ")
+#country.cases.fct("CZ")
 
 
 

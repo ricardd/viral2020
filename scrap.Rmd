@@ -1,0 +1,312 @@
+# Stale notes below
+
+And do the same thing but using the number of confirmed cases instead.
+
+```{r, fig.height=6, fig.width=8, echo=FALSE}
+#obtain top 20 and 10 country for fatalities
+top20.cases <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=20, wt=cumsum.cases) %>%
+ arrange(desc(cumsum.cases))
+
+top10.cases <- ungroup(df) %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) %>%
+ top_n(n=10, wt=cumsum.cases) %>%
+ arrange(desc(cumsum.cases))
+
+g <- 
+  ggplot(filter(df, countriesAndTerritories %in% top20.cases$countriesAndTerritories, cases>0), aes(cumsum.cases, cases)) +
+  geom_line(aes(group=countriesAndTerritories, color=countriesAndTerritories)) +
+  scale_x_log10() +
+  scale_y_log10() +
+    xlab("Cumulative number of cases") +
+  ylab("Daily number of cases") +
+  geom_text_repel(aes(label=countriesAndTerritories, color=countriesAndTerritories),
+ function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +
+theme_minimal(base_size=14) +
+ theme(legend.position = "none") 
+
+g
+```
+
+
+## Number of fatalities vs. time, plot for the top 20 countries based on number of fatalities
+
+```{r fatalities, fig.height=6, fig.width=8, echo=FALSE}
+#plot top 20
+
+require(ggplot2)
+require(ggrepel)
+
+
+g <- ggplot(filter(df, countriesAndTerritories %in% top20.deaths$countriesAndTerritories, cases>0), 
+ aes(dateRep, cumsum.deaths, color=countriesAndTerritories)) +
+ geom_line() +
+ geom_text_repel(aes(label=countriesAndTerritories),
+ function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +
+ theme_minimal(base_size=14) +
+ theme(legend.position = "none") +
+  ylab("Cumulative number of deaths") +
+  ggtitle("Top 20 countries - cumulative number of deaths")
+g
+## and in log space
+g + scale_y_log10()
+
+```
+
+
+
+## Number of confirmed cases vs. time, plot for the top 20 countries based on number of confirmed cases
+
+```{r cases, fig.height=6, fig.width=8, echo=FALSE}
+library(dplyr)
+#obtain top 20 country
+#plot top 20
+
+require(ggplot2)
+require(ggrepel)
+
+
+g <- ggplot(filter(df, countriesAndTerritories %in% top20.cases$countriesAndTerritories, cases>0), 
+ aes(dateRep, cumsum.cases, color=countriesAndTerritories)) +
+ geom_line() +
+ geom_text_repel(aes(label=countriesAndTerritories),
+ function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +
+ theme_minimal(base_size=14) +
+ theme(legend.position = "none") +
+  ylab("Cumulative confirmed number of cases") +
+  ggtitle("Top 20 countries - cumulative number of cases")
+g
+## and in log space
+g + scale_y_log10()
+
+```
+
+
+
+## Number of confirmed cases, as a table
+
+```{r, results="asis", echo=FALSE}
+library(knitr)
+vars <- c("countriesAndTerritories", "cumsum.cases","cumsum.deaths", "popData2018", "cases.per.e06", "deaths.per.e06", "death.rate.percent"
+)
+kable(cbind(rank=1:nrow(for.kable),for.kable[,vars]), row.names = FALSE)
+```
+
+
+
+
+
+## A few countries plotted separately
+Show the number of cumulative confirmed cases for a number of countries, sharing the same x axis from January 1st 2020 to the present.
+
+```{r, fig.asp=5}
+
+countries <- c("Japan","China","United States","Canada","Spain","Italy","France","Germany","Czechia","Norway","Australia","Argentina","Morocco","South Korea","Iran","Switzerland","Russia","Denmark","Singapore","Israel","United Kingdom","Chile")
+
+this.data <- df[which(df$countriesAndTerritories %in% countries & df$cumsum.cases>100),]
+
+ggplot(this.data,
+ aes(dateRep, cumsum.cases)) +
+ geom_line() + 
+ scale_y_log10() + 
+  facet_wrap(~countriesAndTerritories, ncol=2, scales="free_y")
+
+```
+
+## Fitting models
+Fit exponential and logistic models to the data to see whether some countries are seeing a decrease in the number of cases. Let's take South Korea, the United States and Canada as examples to start.
+
+```{r}
+my.logistic.fct <- function(a=100, b=0.1, c=1E03, ti){
+  out <- c / (1 + (((c-a)/a)*exp(-b*ti)))
+  return(out)
+}
+
+#time <- 0:100
+#plot(x=time,y=my.logistic(ti=time))
+
+
+southkoreadata <- df2 %>%
+  filter(countriesAndTerritories == "South_Korea" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep,cumsum.cases,cases,days.since.100.cases)
+
+sk.lm <- lm(log(cumsum.cases)~dateRep, data=southkoreadata)
+sk.lm.pred <- data.frame(dateRep=southkoreadata$dateRep, cumsum.cases=exp(fitted(sk.lm)))
+
+sk.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=southkoreadata, start=list(b=1.2,c=1E04))
+sk.logistic.pred <- data.frame(dateRep=southkoreadata$dateRep, days.since.100.cases=as.numeric(southkoreadata$days.since.100.cases), cumsum.cases=fitted(sk.logistic))
+
+g <- ggplot(southkoreadata, aes(dateRep, cumsum.cases)) +
+  geom_line(aes(color="data")) +
+  geom_point(aes(color="data")) +
+  geom_line(data=sk.lm.pred, aes(dateRep, cumsum.cases, color="exponential model"), linetype=2) +
+  geom_line(data=sk.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("South Korea")
+g
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+southkoreadata$cases.3day.avg <- NA
+oo <- order(southkoreadata$dateRep)
+southkoreadata <- southkoreadata[oo,] # order by date
+
+days <- seq(from=range(southkoreadata$dateRep)[1]+2,to=range(southkoreadata$dateRep)[2],1)
+for(d in days){
+  l1 <- which(southkoreadata$dateRep==d)
+  southkoreadata[l1,"cases.3day.avg"] <- mean(southkoreadata[l1:(l1-2),"cases"])
+}
+
+southkoreadata$R.3day.avg <- southkoreadata$cases.3day.avg / lag(southkoreadata$cases.3day.avg)
+
+ggplot(southkoreadata, aes(dateRep, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("South Korea - R values by day, using a 3 day moving average")
+
+## US
+usdata <- df2 %>%
+  filter(countriesAndTerritories == "United_States_of_America" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep,cumsum.cases,cases,days.since.100.cases)
+us.lm <- lm(log(cumsum.cases)~dateRep, data=usdata)
+us.lm.pred <- data.frame(dateRep=usdata$dateRep, cumsum.cases=exp(fitted(us.lm)))
+#us.logistic 
+
+us.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=usdata, start=list(b=0.28,c=1E06))
+us.logistic.pred <- data.frame(dateRep=usdata$dateRep, days.since.100.cases=as.numeric(usdata$days.since.100.cases), cumsum.cases=fitted(us.logistic))
+long.df <- data.frame(days.since.100.cases=0:60)
+us.logistic.pred.long <-data.frame(dateRep=seq(min(usdata$dateRep),min(usdata$dateRep)+60,1), days.since.100.cases=0:60, cumsum.cases=my.logistic.fct(a=100, b=coef(us.logistic)[1], c=coef(us.logistic)[2], ti=long.df$days.since.100.cases))
+
+ggplot(usdata, aes(dateRep, cumsum.cases)) +
+  geom_line(aes(color="data")) +
+  geom_point(aes(color="data")) +
+  geom_line(data=us.lm.pred, aes(dateRep, cumsum.cases, color="exponential model"), linetype=2) +
+  geom_line(data=us.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model - fit"), linetype=1) +
+  geom_line(data=us.logistic.pred.long, aes(dateRep, cumsum.cases, color="logistic model - prediction"), linetype=2) +
+  xlim(min(usdata$dateRep),min(usdata$dateRep)+60) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("United States") 
+
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+usdata$cases.3day.avg <- NA
+oo <- order(usdata$dateRep)
+usdata <- usdata[oo,] # order by date
+
+days <- seq(from=range(usdata$dateRep)[1]+2,to=range(usdata$dateRep)[2],1)
+for(d in days){
+  l1 <- which(usdata$dateRep==d)
+  usdata[l1,"cases.3day.avg"] <- mean(usdata[l1:(l1-2),"cases"])
+}
+
+usdata$R.3day.avg <- usdata$cases.3day.avg / lag(usdata$cases.3day.avg)
+
+ggplot(usdata, aes(dateRep, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("United States - R values by day, using a 3 day moving average")
+
+
+## Canada
+canadadata <- df2 %>%
+  filter(countriesAndTerritories == "Canada" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep,cumsum.cases,cases,days.since.100.cases)
+canada.lm <- lm(log(cumsum.cases)~dateRep, data=canadadata)
+canada.lm.pred <- data.frame(dateRep=canadadata$dateRep, cumsum.cases=exp(fitted(canada.lm)))
+
+canada.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=canadadata, start=list(b=0.3,c=1E04))
+canada.logistic.pred <- data.frame(dateRep=canadadata$dateRep, days.since.100.cases=as.numeric(canadadata$days.since.100.cases), cumsum.cases=fitted(canada.logistic))
+
+long.df <- data.frame(days.since.100.cases=0:60)
+canada.logistic.pred.long <-data.frame(dateRep=seq(min(canadadata$dateRep),min(canadadata$dateRep)+60,1), days.since.100.cases=0:60, cumsum.cases=my.logistic.fct(a=100, b=coef(canada.logistic)[1], c=coef(canada.logistic)[2], ti=long.df$days.since.100.cases))
+
+ggplot(canadadata, aes(dateRep, cumsum.cases)) +
+  geom_line(aes(color="data")) +
+  geom_point(aes(color="data")) +
+  geom_line(data=canada.lm.pred, aes(dateRep, cumsum.cases, color="exponential model"), linetype=2) +
+  geom_line(data=canada.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model - fit"), linetype=1, lwd=1.2) +
+  geom_line(data=canada.logistic.pred.long, aes(dateRep, cumsum.cases, color="logistic model - prediction"), linetype=2) +
+  xlim(min(canadadata$dateRep),min(canadadata$dateRep)+60) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("Canada") 
+
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+canadadata$cases.3day.avg <- NA
+oo <- order(canadadata$dateRep)
+canadadata <- canadadata[oo,] # order by date
+
+days <- seq(from=range(canadadata$dateRep)[1]+2,to=range(canadadata$dateRep)[2],1)
+for(d in days){
+  l1 <- which(canadadata$dateRep==d)
+  canadadata[l1,"cases.3day.avg"] <- mean(canadadata[l1:(l1-2),"cases"])
+}
+
+canadadata$R.3day.avg <- canadadata$cases.3day.avg / lag(canadadata$cases.3day.avg)
+
+ggplot(canadadata, aes(dateRep, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("Canada - R values by day, using a 3 day moving average")
+
+
+## Italy
+italydata <- df2 %>%
+  filter(countriesAndTerritories == "Italy" & cumsum.cases>100) %>%
+  select(countriesAndTerritories,dateRep,cumsum.cases,cases,days.since.100.cases)
+italy.lm <- lm(log(cumsum.cases)~dateRep, data=italydata)
+italy.lm.pred <- data.frame(dateRep=italydata$dateRep, cumsum.cases=exp(fitted(italy.lm)))
+
+italy.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=100,b,c,as.numeric(days.since.100.cases)), data=italydata, start=list(b=0.7,c=3E05))
+italy.logistic.pred <- data.frame(dateRep=italydata$dateRep, days.since.100.cases=as.numeric(italydata$days.since.100.cases), cumsum.cases=fitted(italy.logistic))
+
+
+ggplot(italydata, aes(dateRep, cumsum.cases)) +
+  geom_line(aes(color="data")) +
+  geom_point(aes(color="data")) +
+  geom_line(data=italy.lm.pred, aes(dateRep, cumsum.cases, color="exponential model"), linetype=2) +
+  geom_line(data=italy.logistic.pred, aes(dateRep, cumsum.cases, color="logistic model"), linetype=1) +
+  guides(color=guide_legend("Model type")) +
+  ggtitle("Italy") 
+
+
+## what is the daily change in the number of new cases, once the number of daily cases is smoothed out to a 3-day moving average?
+italydata$cases.3day.avg <- NA
+oo <- order(italydata$dateRep)
+italydata <- italydata[oo,] # order by date
+
+days <- seq(from=range(italydata$dateRep)[1]+2,to=range(italydata$dateRep)[2],1)
+for(d in days){
+  l1 <- which(italydata$dateRep==d)
+  italydata[l1,"cases.3day.avg"] <- mean(italydata[l1:(l1-2),"cases"])
+}
+
+italydata$R.3day.avg <- italydata$cases.3day.avg / lag(italydata$cases.3day.avg)
+
+ggplot(italydata, aes(dateRep, R.3day.avg)) +
+  geom_line() + 
+  geom_hline(yintercept = 1, lty=2) +
+  ylim(0,1.8) +
+  ggtitle("Italy - R values by day, using a 3 day moving average")
+
+```
+
+
+
+## Number of cases per million people
+Order by decreasing number of cases per one million people. The top of this list is composed of places with small populations.
+
+
+```{r}
+#df$cumsum.cases.per.e06 <- (df$cumsum.cases / df$popData2018) * 1E06
+per.capita <- df %>% filter(dateRep == format(Sys.time(),"%Y-%m-%d")) 
+
+ggplot(per.capita, aes(cases.per.e06)) +
+  geom_histogram()
+
+vars<-c("dateRep","countriesAndTerritories","cumsum.cases","popData2018","cases.per.e06")
+kable(per.capita[order(per.capita$cases.per.e06,decreasing=TRUE),vars])
+
+```
+

@@ -152,7 +152,7 @@ my.logistic.fct <- function(a=100, b=0.1, c=1E03, ti){
 
 
 country.deaths.fct <- function(g.id){
-  this.df <- filter(df2, geoId==g.id, cumsum.deaths>10)
+  this.df <- filter(df2, geoId==g.id, cumsum.deaths>=10)
 
   ## 15 deaths per one million as a starting value for the asymptote c
   c.init <- 15 * (unique(this.df$popData2018)/1E06)
@@ -160,12 +160,14 @@ country.deaths.fct <- function(g.id){
     
   my.lm <- lm(log(cumsum.deaths)~days.since.10.deaths, data=this.df)
   pred.lm <- data.frame(dateRep=this.df$dateRep, cumsum.deaths=exp(fitted(my.lm)))
+
+  initial.num.deaths <- this.df[as.numeric(this.df$days.since.10.deaths)==0,"cumsum.deaths"]
   
-  my.logistic <- nls(cumsum.deaths ~ my.logistic.fct(a=10, b,c,as.numeric(days.since.10.deaths)), data=this.df, start=list(b=0.34,c=c.init))
+  my.logistic <- nls(cumsum.deaths ~ my.logistic.fct(a=initial.num.deaths, b, c, as.numeric(days.since.10.deaths)), data=this.df, start=list(b=0.34,c=c.init))
   logistic.pred <- data.frame(dateRep=this.df$dateRep, days.since.10.deaths=as.numeric(this.df$days.since.10.deaths), cumsum.deaths=fitted(my.logistic))
   ## inflection point
-  t50 <- (log((coef(my.logistic)[2]-10)/10) - log(1))/coef(my.logistic)[1]
-  n50 <- my.logistic.fct(a=10, coef(my.logistic)[1], coef(my.logistic)[2], ti=t50)
+  t50 <- (log((coef(my.logistic)[2]-initial.num.deaths)/initial.num.deaths) - log(1))/coef(my.logistic)[1]
+  n50 <- my.logistic.fct(a=initial.num.deaths, coef(my.logistic)[1], coef(my.logistic)[2], ti=t50)
   logistic.text <- paste0("Inflection point: ", round(t50,0), " days and ", round(n50,0), " deaths")
   
   country.name <- paste0(as.character(unique(this.df$countriesAndTerritories)), " - ", format(max(this.df$cumsum.deaths),big.mark=","), " cumulative deaths")
@@ -194,13 +196,14 @@ country.deaths.fct("IR")
 country.deaths.fct("UK")
 country.deaths.fct("BE")
 country.deaths.fct("CH")
+country.deaths.fct("CA")
 
 ```
 
 ```{r}
 
 country.cases.fct <- function(g.id){
-  this.df <- filter(df2, geoId==g.id, cumsum.cases>100)
+  this.df <- filter(df2, geoId==g.id, cumsum.cases>=100)
 
   ## 1500 cases per one million as a starting value for the asymptote c
   c.init <- 1500 * (unique(this.df$popData2018)/1E06)
@@ -209,7 +212,7 @@ country.cases.fct <- function(g.id){
   my.lm <- lm(log(cumsum.cases)~days.since.100.cases, data=this.df)
   pred.lm <- data.frame(dateRep=this.df$dateRep, cumsum.cases=exp(fitted(my.lm)))
   
-  initial.num.cases <- this.df[as.numeric(this.df$days.since.100.cases)==1,"cumsum.cases"]
+  initial.num.cases <- this.df[as.numeric(this.df$days.since.100.cases)==0,"cumsum.cases"]
   my.logistic <- nls(cumsum.cases ~ my.logistic.fct(a=initial.num.cases, b,c,as.numeric(days.since.100.cases)), data=this.df, start=list(b=0.4,c=c.init))
   logistic.pred <- data.frame(dateRep=this.df$dateRep, days.since.100.cases=as.numeric(this.df$days.since.100.cases), cumsum.cases=fitted(my.logistic))
   ## inflection point

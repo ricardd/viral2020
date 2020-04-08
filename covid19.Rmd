@@ -137,7 +137,6 @@ df2 %>%
 #g
 # and in log space
 g + scale_y_log10() 
-g
 
 ```
 

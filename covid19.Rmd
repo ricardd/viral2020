@@ -140,6 +140,28 @@ g + scale_y_log10()
 
 ```
 
+And do the same for the number of cumulative cases per one million people.
+
+```{r}
+g<-
+df2 %>%
+  filter(countriesAndTerritories %in% n$countriesAndTerritories, as.numeric(df2$days.since.100.cases)>0) %>%
+  ggplot(aes(as.numeric(days.since.100.cases), cases.per.e06, group=countriesAndTerritories, color=countriesAndTerritories)) +
+ geom_line() +
+ theme_minimal(base_size=14) +
+  ylab("Cumulative confirmed number of cases per million people") +
+  ggtitle("Top 20 countries - cumulative") +
+ geom_text_repel(aes(label=countriesAndTerritories),
+ function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +
+ theme_minimal(base_size=14) +
+ theme(legend.position = "none")
+
+
+#g
+# and in log space
+g + scale_y_log10() 
+
+```
 
 ## Country-level summaries
 How are different countries doing? I am testing a function that takes a country as an argument and fits both an exponential growth and a logistic growth model to the number of cumulative cases.

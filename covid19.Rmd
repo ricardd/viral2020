@@ -22,7 +22,7 @@ library(httr)
 GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext = ".csv")))
 
 #read the Dataset sheet into “R”. The dataset will be called "data".
-data <- read.csv(tf)
+data <- read.csv(tf, stringsAsFactors = FALSE)
 names(data)[1] <- "dateRep"
 ## DR
 data$dateRep <- as.Date(data$dateRep, format="%d/%m/%Y") ## DR, incoming data is formatted day/month/year and was not recognised correctly as a date
@@ -33,12 +33,25 @@ df <- data[order(data$countriesAndTerritories, data$dateRep),] %>% group_by(coun
 df$death.rate.percent <- 100*(df$cumsum.deaths / df$cumsum.cases)
 df$cases.per.e06 <- (df$cumsum.cases / df$popData2018)*1E06
 df$deaths.per.e06 <- (df$cumsum.deaths / df$popData2018)*1E06
+## make sure that all countries have a 3-letter code so that they can be merged with the other data frame linking each country to a continent
+#table(df$countryterritoryCode, exclude=FALSE)
+#t.df <- df[df$countryterritoryCode=="",]
+#table(t.df$countriesAndTerritories)
+
+df[df$countriesAndTerritories=="Bonaire, Saint Eustatius and Saba","countryterritoryCode"] <- "BES"
+df[df$countriesAndTerritories=="Falkland_Islands_(Malvinas)","countryterritoryCode"] <- "FLK"
+
+
 ```
 
 ```{r, include=FALSE}
 ## https://datahub.io/JohnSnowLabs/country-and-continent-codes-list
 continent.df <- read.csv("country-and-continent-codes-list-csv_csv.txt")
-
+#head(continent.df)
+#df[which(df$countryterritoryCode==""),]
+#table(continent.df$Country_Name)
+#continent.df[which(continent.df$Country_Name=="Anguilla"),]
+df.continent <- merge(df, continent.df, by.x="countryterritoryCode", by.y="Three_Letter_Country_Code")
 ```
 
 ```{r, echo=FALSE}

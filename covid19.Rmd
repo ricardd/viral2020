@@ -100,7 +100,7 @@ Let's now do the same for another subset of countries.
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 library(dplyr)
-my.countries <- c("AT","SE","CZ","IT","ES","DE","FR","CA","AU")
+my.countries <- c("US","AT","SE","CZ","IT","ES","DE","FR","CA","AU")
 
 g <- 
   ggplot(filter(df, geoId %in% my.countries, deaths>0, cumsum.deaths>=10), aes(cumsum.deaths, deaths)) +
@@ -162,7 +162,7 @@ df2 %>%
   ggplot(aes(as.numeric(days.since.100.cases), cases.per.e06, group=countriesAndTerritories, color=countriesAndTerritories)) +
  geom_line() +
  theme_minimal(base_size=14) +
-  ylab("Cumulative confirmed number of cases per million people") +
+  ylab("Cumulative cases per million people") +
   ggtitle("Top 20 countries - cumulative") +
  geom_text_repel(aes(label=countriesAndTerritories),
  function(d) d[d$dateRep == format(Sys.time(),"%Y-%m-%d"),]) +

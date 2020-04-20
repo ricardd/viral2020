@@ -124,7 +124,7 @@ Present the number of cumulative cases starting on the date when 100 or more cas
 first.day.100.cases <- aggregate(dateRep~countriesAndTerritories, data=df[which(df$cumsum.cases>=100),],min)
 first.day.10.deaths <- aggregate(dateRep~countriesAndTerritories, data=df[which(df$cumsum.deaths>=10),],min)
 df2 <- merge(merge(df, first.day.100.cases, by="countriesAndTerritories"), first.day.10.deaths, by="countriesAndTerritories")
-names(df2)[c(2,16,17)] <- c("dateRep","date.first.100.cases","date.first.10.deaths")
+names(df2)[c(2,17,18)] <- c("dateRep","date.first.100.cases","date.first.10.deaths")
 df2$days.since.100.cases <- df2$dateRep - df2$date.first.100.cases
 df2$days.since.10.deaths <- df2$dateRep - df2$date.first.10.deaths
 
@@ -155,7 +155,7 @@ g + scale_y_log10()
 
 And do the same for the number of cumulative cases per one million people.
 
-```{r}
+```{r, fig.height=6, fig.width=8, echo=FALSE}
 g<-
 df2 %>%
   filter(countriesAndTerritories %in% n$countriesAndTerritories, as.numeric(df2$days.since.100.cases)>0) %>%
@@ -179,7 +179,7 @@ g + scale_y_log10()
 ## Country-level summaries
 How are different countries doing? I am testing a function that takes a country as an argument and fits both an exponential growth and a logistic growth model to the number of cumulative cases.
 
-```{r}
+```{r, fig.height=6, fig.width=8, echo=FALSE}
 my.logistic.fct <- function(a=100, b=0.1, c=1E03, ti){
   out <- c / (1 + (((c-a)/a)*exp(-b*ti)))
   return(out)
@@ -235,7 +235,7 @@ country.deaths.fct("CA")
 
 ```
 
-```{r}
+```{r, fig.height=6, fig.width=8, echo=FALSE}
 
 country.cases.fct <- function(g.id){
   this.df <- filter(df2, geoId==g.id, cumsum.cases>=100)

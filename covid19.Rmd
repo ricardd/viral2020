@@ -100,7 +100,7 @@ Let's now do the same for another subset of countries.
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 library(dplyr)
-my.countries <- c("US","AT","SE","CZ","IT","ES","DE","FR","CA","AU","KR","NZ")
+my.countries <- c("US","AT","SE","CZ","IT","ES","DE","FR","CA","AU","KR","NZ","DK")
 
 g <- 
   ggplot(filter(df, geoId %in% my.countries, deaths>0, cumsum.deaths>=10), aes(cumsum.deaths, deaths)) +
